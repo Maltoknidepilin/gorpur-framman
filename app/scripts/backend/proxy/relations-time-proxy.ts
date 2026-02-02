@@ -4,12 +4,19 @@ import { WordPicture, WordType } from "@/word-picture"
 import { RelationsTimeParams } from "../types/relations-time"
 import { RelationsSort } from "../types/relations"
 import { corpusSelection } from "@/corpora/corpus_listing"
-import { sortBy } from "lodash"
+import { partition, sortBy } from "lodash"
+import { CorpusTransformed } from "@/settings/config-transformed.types"
+import { RelationsEmptyError } from "./relations-proxy"
 
 export type PeriodWordPicture = { range: string; data: WordPicture }
 
 export class RelationsTimeProxy extends ProxyBase<"relations_time"> {
     protected readonly endpoint = "relations_time"
+
+    /** Returns two lists of corpora: one with those selected that support word picture time, and one with those that don't. */
+    static checkCorpusSupport(): [CorpusTransformed[], CorpusTransformed[]] {
+        return partition(corpusSelection.corpora, (corpus) => corpus.has_wordpic_time)
+    }
 
     buildParams(
         type: WordType,
@@ -41,13 +48,16 @@ export class RelationsTimeProxy extends ProxyBase<"relations_time"> {
         const params = this.buildParams(type, word, sort, periodSize, periodAsc)
         const data = await this.send(params)
 
+        if (!data.relations_time) throw new RelationsEmptyError("No relation data in response")
+        const relations = data.relations_time
+
         // Sort periods
-        const ranges = sortBy(Object.keys(data.relations_time), parseInt)
+        const ranges = sortBy(Object.keys(relations), parseInt)
         if (!periodAsc) ranges.reverse()
         // Process each period's data
         return ranges.map((range) => ({
             range,
-            data: new WordPicture(word, type, data.relations_time[range]),
+            data: new WordPicture(word, type, relations[range]),
         }))
     }
 }

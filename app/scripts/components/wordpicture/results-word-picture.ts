@@ -3,7 +3,7 @@ import { RelationsProxy, RelationsEmptyError, RelationsQuery } from "@/backend/p
 import { csvPrepend, MatchedRelation, WordPicture } from "@/word-picture"
 import { html } from "@/util"
 import { RelationsSort } from "@/backend/types/relations"
-import { loc } from "@/i18n"
+import { loc, locObj } from "@/i18n"
 import "@/components/util/help-box"
 import "@/components/util/json_button"
 import "@/components/util/korp-error"
@@ -14,6 +14,7 @@ import { ProgressHandler } from "@/backend/types"
 import { PeriodWordPicture, RelationsTimeProxy } from "@/backend/proxy/relations-time-proxy"
 import { WordpicExampleTask } from "@/task/wordpic-example-task"
 import { RootScope } from "@/root-scope.types"
+import { CorpusTransformed } from "@/settings/config-transformed.types"
 
 type ResultsWordPictureController = IController & {
     isActive: boolean
@@ -23,9 +24,13 @@ type ResultsWordPictureController = IController & {
 
 type ResultsWordPictureScope = IScope & {
     activated: boolean
+    corporaSupported: CorpusTransformed[]
+    corporaUnsupported: CorpusTransformed[]
     data?: PeriodWordPicture[]
+    deselectUnsupported(): void
     downloadOption: CsvType | ""
     error?: string
+    getCorporaUnsupportedTitles: () => string
     /** Find the data of the period before a given one */
     getPrevPeriodData: (period: string) => PeriodWordPicture | undefined
     limit: string // Number as string to work with <select ng-model>
@@ -54,10 +59,7 @@ const LIMITS: readonly number[] = [15, 50, 100, 500, 1000]
 
 angular.module("korpApp").component("resultsWordPicture", {
     template: html`
-        <div ng-if="warning" class="korp-warning" role="status">{{warning}}</div>
-        <korp-error ng-if="error" message="{{error}}"></korp-error>
-
-        <div ng-show="!error && data">
+        <div>
             <div class="bg-gray-100 mb-4 p-2 flex flex-wrap items-baseline justify-between gap-4">
                 <div class="flex flex-wrap items-baseline gap-4">
                     <label>
@@ -129,6 +131,17 @@ angular.module("korpApp").component("resultsWordPicture", {
                 </div>
             </div>
 
+            <div ng-if="warning" class="korp-warning" role="status">{{warning}}</div>
+
+            <div ng-if="!warning && corporaUnsupported.length && corporaSupported.length" class="korp-warning mb-4 p-2">
+                {{'word_pic_unsupported_corpora' | loc:$root.lang}}: {{ getCorporaUnsupportedTitles() }}
+                <button class="btn btn-default btn-sm" ng-click="deselectUnsupported()">
+                    {{'word_pic_unsupported_deselect' | loc:$root.lang}}
+                </button>
+            </div>
+
+            <korp-error ng-if="error" message="{{error}}"></korp-error>
+
             <div ng-show="data && split" class="my-4 flex flex-wrap items-baseline gap-2">
                 <span>{{'word_pic_period_select_label' | loc:$root.lang}}:</span>
                 <div class="btn-group flex-wrap gap-y-1" ng-keydown="onPeriodSelectKeydown($event)">
@@ -190,6 +203,8 @@ angular.module("korpApp").component("resultsWordPicture", {
         ) {
             const $ctrl = this as ResultsWordPictureController
             $scope.activated = false
+            $scope.corporaSupported = []
+            $scope.corporaUnsupported = []
             $scope.downloadOption = ""
             $scope.limit = String(LIMITS[0])
             $scope.limitOptions = [...LIMITS]
@@ -276,6 +291,13 @@ angular.module("korpApp").component("resultsWordPicture", {
 
                 try {
                     if ($scope.splitLocal) {
+                        const [corporaSupported, corporaUnsupported] = RelationsTimeProxy.checkCorpusSupport()
+                        $scope.corporaSupported = corporaSupported
+                        $scope.corporaUnsupported = corporaUnsupported
+
+                        // Abort if no selected corpora support time-divided word picture
+                        if (!corporaSupported.length) return resetView(loc("word_pic_no_time_corpus", store.lang))
+
                         const data = await $scope.proxyTime.makeRequest(
                             query.type,
                             query.word,
@@ -314,6 +336,14 @@ angular.module("korpApp").component("resultsWordPicture", {
                 // Unless sorting ascending (oldest first), the previous period is the next in the array
                 return $scope.data[index + (asc ? -1 : 1)]
             }
+
+            $scope.deselectUnsupported = () => {
+                store.corpus = $scope.corporaSupported.map((corpus) => corpus.id)
+                setTimeout(() => makeRequest())
+            }
+
+            $scope.getCorporaUnsupportedTitles = () =>
+                $scope.corporaUnsupported.map((corpus) => locObj(corpus.title)).join(", ")
 
             $scope.onClickExample = function (relation) {
                 $rootScope.kwicTabs.push(new WordpicExampleTask(relation.source.join(","), !!$scope.split))

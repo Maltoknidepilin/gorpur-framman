@@ -35,6 +35,7 @@ export type Corpus = {
     context: Labeled[]
     deptree?: DeptreeConfig
     description: LangString
+    has_wordpic_time?: boolean
     hide?: boolean
     id: string
     /** Must be present in parallel corpus */
