@@ -48,16 +48,15 @@ export class RelationsTimeProxy extends ProxyBase<"relations_time"> {
         const params = this.buildParams(type, word, sort, periodSize, periodAsc)
         const data = await this.send(params)
 
-        if (!data.relations_time) throw new RelationsEmptyError("No relation data in response")
-        const relations = data.relations_time
-
         // Sort periods
-        const ranges = sortBy(Object.keys(relations), parseInt)
+        const ranges = sortBy(Object.keys(data.relations_time), parseInt)
+        if (!ranges.length) throw new RelationsEmptyError("No relation data in response")
         if (!periodAsc) ranges.reverse()
+
         // Process each period's data
         return ranges.map((range) => ({
             range,
-            data: new WordPicture(word, type, relations[range]),
+            data: new WordPicture(word, type, data.relations_time[range]),
         }))
     }
 }

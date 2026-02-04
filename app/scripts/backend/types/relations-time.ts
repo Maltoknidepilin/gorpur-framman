@@ -10,5 +10,5 @@ export type RelationsTimeParams = RelationsParams & {
 export type RelationsTimeResponse = {
     range: { start: number; end: number }
     period_size: number
-    relations_time?: Record<string, Relation[]>
+    relations_time: Record<string, Relation[]>
 }
