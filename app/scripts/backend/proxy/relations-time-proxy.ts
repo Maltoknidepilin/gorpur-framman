@@ -15,7 +15,7 @@ export class RelationsTimeProxy extends ProxyBase<"relations_time"> {
 
     /** Returns two lists of corpora: one with those selected that support word picture time, and one with those that don't. */
     static checkCorpusSupport(): [CorpusTransformed[], CorpusTransformed[]] {
-        return partition(corpusSelection.corpora, (corpus) => corpus.has_wordpic_time)
+        return partition(corpusSelection.corpora, (corpus) => corpus.features?.relations_time)
     }
 
     buildParams(

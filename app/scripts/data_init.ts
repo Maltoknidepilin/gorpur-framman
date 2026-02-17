@@ -49,6 +49,10 @@ async function getConfig(): Promise<Config> {
         corpus: corpusIds?.join(",") || undefined,
     })
 
+    // TODO Testing
+    config.corpora.attasidor.features = { relations_time: true }
+    config.corpora.vivill.features = { relations_time: true }
+
     return config
 }
 
