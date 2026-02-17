@@ -31,7 +31,7 @@ type WordPictureColumnController = IController & {
     /** Format the numbers for all stats of a row (freq etc). */
     formatStats: (stats: RelationStats) => Record<RelationsSort, string>
     /** Get the row stats as a string with HTML linebreaks */
-    getStatsTooltip: (row: Row) => string
+    getStatsTooltip: (stats: RelationStats) => string
     getTrendMarker: (item: Row) => string
     parseLemgram: (row: Row) => { label: string; pos?: string; idx?: number }
 }
@@ -112,18 +112,17 @@ angular.module("korpApp").component("wordPictureColumn", {
                 }
             }
 
-            $ctrl.formatStats = (row) => ({
-                freq: String(row.freq),
-                freq_relative: formatNumber(row.freq_relative),
-                mi: formatNumber(row.mi),
-                rmi: formatNumber(row.rmi),
+            $ctrl.formatStats = (stats: RelationStats) => ({
+                freq: String(stats.freq),
+                freq_relative: formatNumber(stats.freq_relative),
+                mi: formatNumber(stats.mi),
+                rmi: formatNumber(stats.rmi),
             })
 
-            $ctrl.getStatsTooltip = (row) => {
-                if (!row.currentStats) return ""
-                const stats = $ctrl.formatStats(row.currentStats)
-                return Object.keys(stats)
-                    .map((key: RelationsSort) => `${loc(`stat_${key}`, store.lang)}: ${stats[key]}`)
+            $ctrl.getStatsTooltip = (stats) => {
+                const formatted = $ctrl.formatStats(stats)
+                return Object.keys(formatted)
+                    .map((key: RelationsSort) => `${loc(`stat_${key}`, store.lang)}: ${formatted[key]}`)
                     .join("<br />")
             }
 
