@@ -50,9 +50,11 @@ async function getConfig(): Promise<Config> {
     })
 
     // TODO Testing
-    config.corpora.attasidor.features = { relations_time: true }
-    config.corpora.poeter.features = { relations_time: true }
-    config.corpora.vivill.features = { relations_time: true }
+    if (currentMode == "default") {
+        config.corpora.attasidor.features = { relations_time: true }
+        config.corpora.poeter.features = { relations_time: true }
+        config.corpora.vivill.features = { relations_time: true }
+    }
 
     return config
 }
