@@ -36,5 +36,6 @@ interface Window {
 namespace NodeJS {
     interface ProcessEnv {
         ENVIRONMENT: "development" | "staging" | "production"
+        KORP_BACKEND_URL?: string
     }
 }

@@ -3,16 +3,43 @@ const path = require("path")
 const Dotenv = require("dotenv")
 const CopyWebpackPlugin = require("copy-webpack-plugin")
 const HtmlWebpackPlugin = require("html-webpack-plugin")
+const fs = require("fs")
 
 // Read .env into process.env
 Dotenv.config()
 
 // Read config dir
 let korpConfigDir = "app"
-try {
-    korpConfigDir = require("./run_config.json").configDir
-    console.log(`Using "${korpConfigDir}" as config directory.`)
-} catch {}
+if (process.env.KORP_CONFIG_DIR) {
+    korpConfigDir = process.env.KORP_CONFIG_DIR
+    console.info(`✅ Config directory found via KORP_CONFIG_DIR: "${korpConfigDir}"`)
+} else {
+    try {
+        korpConfigDir = require("./run_config.json").configDir
+        console.info(`✅ Config directory found: "${korpConfigDir}"`)
+    } catch (e) {
+        console.warn(`⚠️ Warning: No KORP_CONFIG_DIR or run_config.json.configDir found, falling back to "app"`)
+    }
+}
+
+const configYmlPath = path.resolve(korpConfigDir, "config.yml")
+const modesDir = path.resolve(korpConfigDir, "modes")
+const customDir = path.resolve(korpConfigDir, "custom")
+
+if (!fs.existsSync(configYmlPath)) {
+    console.warn(`⚠️ Warning: Configuration file not found: ${configYmlPath}`)
+    console.warn(`   Create it with: cp ${path.resolve("app", "config.yml.example")} ${configYmlPath}`)
+}
+
+if (!fs.existsSync(modesDir)) {
+    console.warn(`⚠️ Warning: Modes directory not found: ${modesDir}`)
+    console.warn(`   Create it with: mkdir -p ${modesDir}`)
+}
+
+if (!fs.existsSync(customDir)) {
+    console.warn(`⚠️ Warning: Custom directory not found: ${customDir}`)
+    console.warn(`   Create it with: mkdir -p ${customDir}`)
+}
 
 module.exports = {
     resolve: {
@@ -173,6 +200,7 @@ module.exports = {
             // See https://webpack.js.org/plugins/environment-plugin/
             // Using our own variable instead of NODE_ENV, since NODE_ENV should really only be "development" or "production"
             ENVIRONMENT: "development", // Can be: "development", "staging" or "production"
+            KORP_BACKEND_URL: "",
         }),
     ],
     ignoreWarnings: [
