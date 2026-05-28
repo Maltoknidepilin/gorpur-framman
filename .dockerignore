@@ -1,0 +1,11 @@
+.git
+.gitignore
+node_modules/
+dist/
+build/
+coverage/
+*.log
+.github/
+doc/
+README.md
+CHANGELOG.md

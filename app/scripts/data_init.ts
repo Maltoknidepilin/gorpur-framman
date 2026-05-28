@@ -129,6 +129,11 @@ function transformConfig(config: Config, infos: InfoData): ConfigTransformed {
  * `settings` object.
  */
 export async function fetchInitialData(authDef: Promise<boolean>) {
+    const envBackendUrl = (process.env.KORP_BACKEND_URL || "").trim()
+    if (envBackendUrl) {
+        settings.korp_backend_url = envBackendUrl
+    }
+
     settings.korp_backend_url = settings.korp_backend_url.trim()
     if (settings.korp_backend_url.slice(-1) == "/") {
         settings.korp_backend_url = settings.korp_backend_url.slice(0, -1)
