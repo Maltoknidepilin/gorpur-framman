@@ -170,6 +170,19 @@ angular.module("korpApp").component("sidebar", {
             $ctrl.updateContent = ({ sentenceData, wordData, corpus, tokens, inReadingMode }) => {
                 // TODO: this is pretty broken
                 const corpusObj = settings.corpora[corpus] || corpusListing.get(corpus)
+                const sidebarWindow = window as Window & {
+                    __foHiddenMetaSig?: string | null
+                    __foHiddenMeta?: Record<string, unknown>
+                    __foHiddenMetaOpen?: boolean
+                }
+
+                // Reset custom hidden-row state on every selected token.
+                // Otherwise values collected for the previous token can leak into the next one.
+                sidebarWindow.__foHiddenMetaSig = null
+                sidebarWindow.__foHiddenMeta = {}
+                sidebarWindow.__foHiddenMetaOpen = false
+                $element.find("#fo-hidden-meta").remove()
+
                 $ctrl.corpusObj = corpusObj
                 $ctrl.sentenceData = sentenceData
                 $ctrl.inReadingMode = inReadingMode
