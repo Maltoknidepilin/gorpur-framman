@@ -4,11 +4,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends git && rm -rf /
 
 WORKDIR /opt/gorpur-framman
 
-COPY package.json /opt/gorpur-framman/package.json
-COPY yarn.lock /opt/gorpur-framman/yarn.lock
+COPY gorpur-framman/package.json /opt/gorpur-framman/package.json
+COPY gorpur-framman/yarn.lock /opt/gorpur-framman/yarn.lock
 
 RUN corepack enable && \
     yarn install --frozen-lockfile && \
     yarn cache clean
+
+COPY gorpur-framman/ /opt/gorpur-framman/
+COPY gorps-stillingar-framman/ /opt/gorps-stillingar-framman/
 
 EXPOSE 9111

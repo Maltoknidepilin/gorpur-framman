@@ -87,8 +87,8 @@
     "toggle_select": "vel",
     "modal_close": "lat aftur",
 
-    "case_insensitive": "óstavbundið",
-    "case_sensitive": "skiftlägesberoende",
+    "case_insensitive": "eingin munur á stórum/smáum stavum",
+    "case_sensitive": "ger mun á stórum og smáum stavum",
     "reduce_text": "Sammanställ på",
     "word_pic_bad_search": "Ordbild kräver att sökfrågan innehåller exakt ett ord eller lemgram.",
     "word_pic_global_filter": "Ordbild kan inte kombineras med filter. Töm filter för att fortsätta.",
@@ -112,7 +112,7 @@
     "map_abs_occurrences": "Absoluta förekomster",
     "map_rel_occurrences": "Relativa förekomster",
 
-    "search_aborted": "Sökningen avbröts",
+    "search_aborted": "Leitingin bleiv avbrotin",
 
     "is": "er",
     "equal": "lika med",
@@ -125,10 +125,10 @@
     "subsumed_by": "subsumerad av",
     "not_subsumed_by": "inte subsumerad av",
 
-    "word_is": "ordet är",
-    "word_is_not": "ordet är inte",
-    "word_beginswith": "ordet börjar med",
-    "word_endswith": "ordet slutar med",
+    "word_is": "orðið er",
+    "word_is_not": "orðið er ikki",
+    "word_beginswith": "orðið byrjar við",
+    "word_endswith": "orðið endar við",
     "matches_regexp": "reguljärt uttryck",
     "wordclass_is": "ordklassen är",
     "wordclass_starts": "ordklassen börjar med",
@@ -268,10 +268,10 @@
     "text": "tekstur",
     "word": "orð",
 
-    "compare_vb": "Jämför",
-    "compare_with": "med",
+    "compare_vb": "Samanber",
+    "compare_with": "við",
     "compare_reduce": "och sammanställ på",
-    "compare_warning": "Du måste spara minst två sökningar för att kunna jämföra. Leta efter pilen bredvid sökknappen.",
+    "compare_warning": "Tú mást goyma minst tvær leitingar fyri at kunna samanbera. Trýst á pílin við síðuna av leitiknappinum.",
     "compare_delete": "Strika goymdar leitingar",
     "compare_save_header": "Goym til samanburðar",
     "compare_name": "Navn",
@@ -312,7 +312,7 @@
     "corpselector_allselected": " korpusar valda (alla)",
     "corpselector_noneselected": "Ingen vald korpus",
     "corpselector_selectedone": " er valt",
-    "corpselector_selectedmultiple": " undirgrunnum valdir",
+    "corpselector_selectedmultiple": " málgrunnum valdir",
     "corpselector_buttonselectall": "Vel allar",
     "corpselector_buttonselectnone": "Vel ongan",
     "corpselector_numberoftokens": "Tal av token",
@@ -346,12 +346,12 @@
     "util_decimalseparator": ",",
     "util_numbergroupseparator": "&nbsp;",
 
-    "hitspicture_hits": "träffar",
+    "hitspicture_hits": "úrslit",
     "hitspicture_gotocorpushits": "Klicka för att gå till första sidan med träffar från denna korpus.",
 
     "hits_per_mil": "Träffar per miljon token",
 
-    "chapter": "kapitel",
+    "chapter": "kapittul",
     "verse": "vers",
     "saldom": "moderna",
     "dalinm": "1800-tal",
@@ -360,15 +360,15 @@
 
     "newsdesk-header": "Nyheter",
 
-    "in_context_prefix": " i ",
-    "context_sentences": "satser",
-    "context_paragraphs": "stycken",
-    "context_texts": "texter",
-    "which_contain": "som innehåller",
-    "baseforms": "grundformer",
-    "wordforms": "ordformer",
+    "in_context_prefix": " í ",
+    "context_sentences": "setningum",
+    "context_paragraphs": "reglubrotum",
+    "context_texts": "tekstum",
+    "which_contain": "sum innihalda",
+    "baseforms": "leitorð",
+    "wordforms": "orðasnið",
 
-    "download_kwic": "Hála niður leitúrslit sum…",
+    "download_kwic": "Hála niður leitúrslit sum ...",
     "formatdescr_json": "JavaScript Object Notation",
     "download_kwic_csv": "setning í hvørji røð (CSV)",
     "formatdescr_csv": "Kommaseparerade värden, en mening per rad, t ex for att importera till ett kalkylbladsprogram. Varje rad har en korpusidentifierare, träffens korpusposition, vänsterkontext, träffen, högerkontext och textattribut. Träffen och kontexter innehåller token utan attribut.",
@@ -406,7 +406,7 @@
     "stats_not_in_order_warn": "Statistiken stödjer för närvarande inte sökalternativet \"i fri följd\".",
 
     "read_in_strix": "Läs texten i Strix",
-    "read_in_korp": "Läs i Korp",
+    "read_in_korp": "Les í Korpi",
     "add_token": "Legg orð afturat",
 
     "free_order_chk": "frí raðfylgja",
