@@ -4,55 +4,32 @@
 </div>
 
 <div id="about_body" class="modal-body">
-    <p ng-bind-html="'about_body' | loc:lang | trust"></p>
+    <h4 ng-bind-html="'about_short' | loc:lang | trust"></h4>
+    <div ng-bind-html="'about_body' | loc:lang | trust"></div>
 
-    <h4 ng-bind-html="'about_cite_header' | loc:lang | trust"></h4>
-    <p ng-bind-html="'about_cite' | loc:lang | trust"></p>
+    <h4 ng-bind-html="'about_MMG_header' | loc:lang | trust"></h4>
+    <div ng-bind-html="'about_MMG' | loc:lang | trust"></div>
+
+    <h4 ng-bind-html="'about_korp_header' | loc:lang | trust"></h4>
+    <div ng-bind-html="'about_korp' | loc:lang | trust"></div>
 
     <h4>{{'about_man' | loc:lang}}</h4>
     <ul>
         <li>
-            <a target="_blank" href="https://spraakbanken.gu.se/om/personal/lars">Lars Borin</a>
-        </li>
-        <li>
-            <a target="_blank" href="https://spraakbanken.gu.se/om/personal/markus">Markus Forsberg</a>
+            <a target="_blank" href="https://www.pure.fo/en/persons/iben-nyholm-debess/">Iben Nyholm Debess</a>
         </li>
     </ul>
 
     <h4>{{'about_dev' | loc:lang}}</h4>
     <ul>
-        <li>
-            <a target="_blank" href="https://spraakbanken.gu.se/om/personal/maria">Maria Öhrman</a>
-        </li>
-        <li>
-            <a target="_blank" href="https://spraakbanken.gu.se/om/personal/martin">Martin Hammarstedt</a>
-        </li>
-        <li>
-            <a target="_blank" href="https://spraakbanken.gu.se/om/personal/anne">Anne Schumacher</a>
-        </li>
-        <li>
-            <a target="_blank" href="https://spraakbanken.gu.se/om/personal/arild">Arild Matsson</a>
-        </li>
+        <li>Uni Johannesen</li>
+        <li>Ingmar Berg</li>
     </ul>
 
     <h4>{{'about_contributors' | loc:lang}}</h4>
     <ul>
-        <li>Dan Rosén</li>
-        <li>Johan Roxendal</li>
-        <li>
-            <a target="_blank" href="https://spraakbanken.gu.se/om/personal/jonatan">Jonatan Uppström</a>
-        </li>
-        <li>Jyrki Niemi</li>
-        <li>Malin Ahlberg</li>
-        <li>Olof Olsson</li>
-        <li>
-            <a target="_blank" href="https://spraakbanken.gu.se/om/personal/peter">Peter Ljunglöf</a>
-        </li>
-        <li>Roland Schäfer</li>
+        <li>Barbara Scalvini</li>
+        <li>Annika Simonsen</li>
     </ul>
 
-    <p>
-        {{'about_logo' | loc:lang}}
-        <a target="_blank" href="https://spraakbanken.gu.se/om/personal/staffan">Staffan Melin</a>.
-    </p>
 </div>

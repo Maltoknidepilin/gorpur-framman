@@ -737,16 +737,18 @@ span.absStat {
 }
 
 #about_body {
+    position: relative;
+
     &:after {
         content: "";
         z-index: 0;
         position: absolute;
-        top: 245px;
+        bottom: 30px;
         right: 0;
         background: url("../img/feather.svg") no-repeat;
         background-size: contain;
-        height: 430px;
-        width: 230px;
+        height: 287px;
+        width: 153px;
     }
 }
 

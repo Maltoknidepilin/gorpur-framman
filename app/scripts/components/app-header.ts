@@ -58,7 +58,7 @@ angular.module("korpApp").component("appHeader", {
                 </ul>
 
                 <div class="flex items-center gap-4">
-                    <login-status></login-status>
+                    <!-- <login-status></login-status> -->
 
                     <radio-list options="$ctrl.languages" ng-model="$root.lang"> </radio-list>
 
@@ -81,17 +81,6 @@ angular.module("korpApp").component("appHeader", {
                             <li>
                                 <a href="https://spraakbanken.gu.se/verktyg/korp/användarhandledning" target="_blank">
                                     {{'docs' | loc:$root.lang}}
-                                </a>
-                            </li>
-                            <li id="korplink">
-                                <a href="/korp"> {{'korp' | loc:$root.lang}} </a>
-                            </li>
-                            <li id="korplablink">
-                                <a href="/korplabb"> {{'korp_lab' | loc:$root.lang}} </a>
-                            </li>
-                            <li>
-                                <a href="https://spraakbanken.gu.se/sparv" target="_blank">
-                                    {{'import_chain' | loc:$root.lang}}
                                 </a>
                             </li>
                         </ul>
