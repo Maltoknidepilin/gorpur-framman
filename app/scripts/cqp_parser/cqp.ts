@@ -96,21 +96,47 @@ export function stringify(cqp_obj: CqpQuery, expanded_format?: boolean): string 
             const or_array: string[] = []
             for (let { type, op, val, flags } of and_array) {
                 var out
-                if (expanded_format) {
-                    ;[val, op] = operatorMap[op](val)
-                }
+                const wordAttribute =
+                    op === "=" && typeof val === "string"
+                        ? corpusSelection.getWordAttribute(type)
+                        : undefined
+                const valueCqp = typeof val === "string" ? wordAttribute?.value_cqp?.[val] : undefined
 
                 let flagstr = ""
                 if (flags && Object.keys(flags).length) {
                     flagstr = ` %${Object.keys(flags).join("")}`
                 }
 
-                if (type === "word" && val === "") {
-                    out = ""
-                } else if (corpusSelection.isDateInterval(type)) {
-                    out = parseDateInterval(op, val as DateRange, expanded_format)
+                if (valueCqp?.length) {
+                    const conditions = valueCqp.map((condition) => {
+                        let conditionOp: OperatorKorp = condition.op
+                        let conditionVal: Value = condition.val
+                        if (expanded_format) {
+                            ;[conditionVal, conditionOp] = operatorMap[conditionOp](conditionVal)
+                        }
+                        return `${condition.type} ${conditionOp} "${conditionVal}"`
+                    })
+                    const joinConfig = wordAttribute?.value_cqp_join
+                    const valueJoiner =
+                        typeof joinConfig === "string"
+                            ? joinConfig
+                            : typeof val === "string"
+                              ? joinConfig?.[val]
+                              : undefined
+                    const joiner = valueJoiner === "|" ? " | " : " & "
+                    out = `(${conditions.join(joiner)})`
                 } else {
-                    out = `${type} ${op} \"${val}\"`
+                    if (expanded_format) {
+                        ;[val, op] = operatorMap[op](val)
+                    }
+
+                    if (type === "word" && val === "") {
+                        out = ""
+                    } else if (corpusSelection.isDateInterval(type)) {
+                        out = parseDateInterval(op, val as DateRange, expanded_format)
+                    } else {
+                        out = `${type} ${op} "${val}"`
+                    }
                 }
 
                 if (out) {

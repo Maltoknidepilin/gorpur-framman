@@ -73,6 +73,7 @@ export type Attribute = {
     extended_component?: MaybeWithOptions
     extended_template?: string
     external_search?: string
+    filter_hide_values?: string[]
     group_by?: "group_by" | "group_by_struct"
     hide_compare?: boolean
     hide_extended?: boolean
@@ -89,6 +90,9 @@ export type Attribute = {
     pattern?: string
     ranked?: boolean
     sidebar_component?: MaybeWithOptions
+    sidebar_hide_values?: string[]
+    sidebar_hide_when?: Record<string, string | string[]>
+    sidebar_value_map?: Record<string, Record<string, string>>
     sidebar_info_url?: string
     sidebar_hide_label?: boolean
     stats_cqp?: string
@@ -96,12 +100,15 @@ export type Attribute = {
     stringify?: string
     translation?: LocLangMap | LocMap
     type?: "set" | "url"
+    value_cqp?: Record<string, Array<{ type: string; op: OperatorKorp; val: string }>>
+    value_cqp_join?: "&" | "|" | Record<string, "&" | "|">
 }
 
 export type CustomAttribute = {
     custom_type: string
     label: LangString
     name: string
+    order?: number
     pattern?: string
     sidebar_component?: MaybeWithOptions
 }

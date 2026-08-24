@@ -45,12 +45,9 @@ angular.module("korpApp").component("globalFilters", {
             $ctrl.$onInit = () => {
                 /** Update available filters when changing corpus selection. */
                 store.watch("corpus", async () => {
-                    if (corpusSelection.corpora.length > 0) {
-                        // Load values for available attributes.
-                        const attrs = Object.values(corpusSelection.getDefaultFilters())
-                        $scope.show = attrs.length > 0
-                        manager.update(attrs)
-                    }
+                    const attrs = Object.values(corpusSelection.getDefaultFilters())
+                    $scope.show = false
+                    await manager.update(attrs)
                 })
 
                 /** Set up sync from url params to local data. */
@@ -58,7 +55,11 @@ angular.module("korpApp").component("globalFilters", {
 
                 manager.listen(() =>
                     $scope.$applyAsync(() => {
-                        $scope.filters = { ...manager.filters }
+                        const visibleFilters = Object.fromEntries(
+                            Object.entries(manager.filters).filter(([, filter]) => filter.options.length),
+                        )
+                        $scope.filters = visibleFilters
+                        $scope.show = Object.keys(visibleFilters).length > 0
                         // Update the CQP fragment used when searching
                         store.globalFilter = manager.getCqp()
                         // Update URL

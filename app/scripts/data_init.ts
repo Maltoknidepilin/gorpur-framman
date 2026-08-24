@@ -73,7 +73,15 @@ function transformConfig(config: Config, infos: InfoData): ConfigTransformed {
             if (!names || !attrs) return [{}, []]
             const defs1 = pick(attrs, names)
             const defs = keyBy(defs1, "name")
-            const order = names.map((name) => attrs[name].name)
+            const defaultOrder = 50 // Before explicitly trailing attributes (98/99).
+            const order = names
+                .map((name, index) => ({
+                    name: attrs[name].name,
+                    order: attrs[name].order ?? defaultOrder,
+                    index,
+                }))
+                .sort((a, b) => a.order - b.order || a.index - b.index)
+                .map(({ name }) => name)
             return [defs, order]
         }
 

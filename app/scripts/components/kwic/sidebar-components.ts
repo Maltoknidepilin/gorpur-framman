@@ -82,7 +82,11 @@ export const sidebarDefaultComponent: SidebarComponent = {
         "store",
         function ($scope: SidebarDefaultComponentScope, store: StoreService) {
             $scope.decodeURI = decodeURI
-            $scope.isEmpty = !$scope.value || ($scope.attrs.type == "set" && $scope.value == "|")
+            const hideValues = $scope.attrs.sidebar_hide_values || []
+            const isEmptySet = $scope.attrs.type == "set" && !$scope.value?.split("|").some((item) => item.trim())
+            const isEmptyScalar =
+                $scope.attrs.type != "set" && (!$scope.value?.trim() || hideValues.includes($scope.value))
+            $scope.isEmpty = isEmptySet || isEmptyScalar
             $scope.valueArray = ($scope.value?.split("|") || []).filter(Boolean)
 
             /** Render a single value using attribute options. */

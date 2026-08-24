@@ -118,7 +118,9 @@ export class GlobalFilterManager extends Observable {
         for (const value in elements) {
             let childCount: number
             const child = elements[value]
-            const selected = !filter.value.length || filter.value.includes(value)
+            const hiddenValues = filter.attribute.filter_hide_values || []
+            const meaningful = Boolean(value.trim()) && !hiddenValues.includes(value)
+            const selected = !meaningful || !filter.value.length || filter.value.includes(value)
 
             // filter out any parent values that do not support the child values
             include = include || selected
@@ -131,7 +133,7 @@ export class GlobalFilterManager extends Observable {
             }
 
             const countDisplay = include && parentSelected ? childCount : 0
-            filter.options.push([value, countDisplay])
+            if (meaningful) filter.options.push([value, countDisplay])
 
             if (selected && include) sum += childCount
         }

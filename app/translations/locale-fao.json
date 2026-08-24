@@ -415,12 +415,12 @@
 
     "free_order_chk": "frí raðfylgja",
     "free_order_chk_help": "Leitorðini kunnu koma fyri í óbundnari røð, og ikki neyðturviliga í røð.",
-    "prefix_chk": "forskoyti",
-    "prefix_chk_help": "Loyva orðum, sum byrja við leitorðunum.",
-    "midfix_chk": "miðskoyti",
-    "midfix_chk_help": "Loyva orðum, sum bera leitorðini í sær.",
-    "suffix_chk": "eftirskoyti",
-    "suffix_chk_help": "Loyva orðum, sum enda við leitorðunum.",
+    "prefix_chk": "byrjar við",
+    "prefix_chk_help": "Finn orð, sum byrja við leitorðinum.",
+    "midfix_chk": "inniheldur",
+    "midfix_chk_help": "Finn orð, sum innihalda leitorðið.",
+    "suffix_chk": "endar við",
+    "suffix_chk_help": "Finn orð, sum enda við leitorðinum.",
     "text_tab_header": "Läsläge",
 
     "not_compound_middle": "inte mellanled",
