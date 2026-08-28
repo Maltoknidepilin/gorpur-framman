@@ -18,6 +18,7 @@ type CcInfoBoxController = IController & {
     isFolder: boolean
     title: LangString
     description?: LangString
+    license?: LangString
     link?: CorpusLinkInfo
     numberOfChildren: number
     langStats: CorpusSizeInfo[]
@@ -35,6 +36,10 @@ angular.module("korpApp").component("ccInfoBox", {
                 {{ $ctrl.title | locObj:$root.lang }}
             </h3>
             <div class="text-base my-3" ng-bind-html="$ctrl.description | locObj:$root.lang | trust"></div>
+            <div class="text-base my-3" ng-if="$ctrl.license">
+                <strong>{{'corpselector_license' | loc:$root.lang}}:</strong>
+                <span ng-bind-html="$ctrl.license | locObj:$root.lang | trust"></span>
+            </div>
             <div ng-if="$ctrl.link" class="my-3">
                 <a ng-href="{{$ctrl.link.url}}" target="_blank">
                     {{$ctrl.link.label}}
@@ -77,6 +82,7 @@ angular.module("korpApp").component("ccInfoBox", {
             $ctrl.$onChanges = () => {
                 $ctrl.title = $ctrl.object.title
                 $ctrl.description = $ctrl.object.description
+                $ctrl.license = $ctrl.object.license
 
                 $ctrl.isFolder = isFolder($ctrl.object)
                 $ctrl.isCorpus = !$ctrl.isFolder
