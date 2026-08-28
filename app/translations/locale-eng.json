@@ -294,6 +294,7 @@
     "corpselector_corporawith_sing": "corpus with",
     "corpselector_corporawith_plur": "corpora with",
     "corpselector_lastupdate": "Last update",
+    "corpselector_license": "License",
     "corpselector_supports": "Supports extended context.",
     "corpselector_limited": "The corpus is protected.",
     "corpselector_of": " of ",

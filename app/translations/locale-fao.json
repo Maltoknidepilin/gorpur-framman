@@ -327,6 +327,7 @@
     "corpselector_corporawith_sing": "málgrunnur",
     "corpselector_corporawith_plur": "málgrunnar",
     "corpselector_lastupdate": "Seinast dagført",
+    "corpselector_license": "Loyvi",
     "corpselector_supports": "Stödjer utökad kontextvisning.",
     "corpselector_limited": "Korpusen är skyddad.",
     "corpselector_of": " av ",
@@ -372,7 +373,7 @@
     "baseforms": "leitorð",
     "wordforms": "orðasnið",
 
-    "download_kwic": "Hála niður leitúrslit sum ...",
+    "download_kwic": "Tak leitúrslit niður sum ...",
     "formatdescr_json": "JavaScript Object Notation",
     "download_kwic_csv": "setning í hvørji røð (CSV)",
     "formatdescr_csv": "Kommaseparerade värden, en mening per rad, t ex for att importera till ett kalkylbladsprogram. Varje rad har en korpusidentifierare, träffens korpusposition, vänsterkontext, träffen, högerkontext och textattribut. Träffen och kontexter innehåller token utan attribut.",

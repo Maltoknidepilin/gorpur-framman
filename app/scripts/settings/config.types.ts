@@ -39,6 +39,7 @@ export type Corpus = {
     id: string
     /** Must be present in parallel corpus */
     lang?: string
+    license?: LangString
     limited_access?: boolean
     linked_to?: string[]
     pivot?: boolean
@@ -59,6 +60,7 @@ export type ReadingModeConfig = {
 
 export type Folder = {
     description?: LangString
+    license?: LangString
     title: LangString
     subfolders?: Record<string, Folder>
     corpora?: string[]

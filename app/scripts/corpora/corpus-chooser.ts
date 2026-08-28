@@ -19,6 +19,7 @@ export type ChooserFolderSub = ChooserFolder & {
     id: string
     title: LangString
     description?: LangString
+    license?: LangString
     selected: "none" | "some" | "all"
     extended?: boolean
 }
@@ -73,6 +74,7 @@ export const initCorpusStructure = (collection: Record<string, CorpusTransformed
                 id,
                 title: folder.title,
                 description: folder.description,
+                license: folder.license,
                 corpora,
                 numberOfChildren: nCorpora,
                 tokens,
