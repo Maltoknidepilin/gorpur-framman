@@ -13,9 +13,9 @@ type GlobalFiltersScope = IScope & {
 
 /**
  * "Global filters" are text-level CQP conditions for selected attributes, that are managed separately in the GUI and
- * then merged with the tokens of the query when sending it to the backend. The core functions manage the state of the
- * filters, which lives in the root scope. The GUI component is duplicated in simple and extended search, and it
- * manages user-selected values.
+ * then merged with the tokens of a Simple-search query when sending it to the backend. The core functions manage the
+ * state of the filters, which lives in the root scope. The GUI is intentionally shown only in Simple search; Extended
+ * search offers the same structural attributes inside its query builder instead.
  */
 angular.module("korpApp").component("globalFilters", {
     template: html`<div ng-if="show" class="mb-4">

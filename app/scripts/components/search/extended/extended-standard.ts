@@ -2,13 +2,12 @@ import angular, { IController, IScope, ITimeoutService } from "angular"
 import { isEqual } from "lodash"
 import statemachine from "@/statemachine"
 import { corpusSelection } from "@/corpora/corpus_listing"
-import { expandOperators, mergeCqpExprs, parse, stringify, supportsInOrder } from "@/cqp_parser/cqp"
+import { expandOperators, parse, supportsInOrder } from "@/cqp_parser/cqp"
 import { html } from "@/util"
 import { LocationService } from "@/services/types"
 import { matomoSend } from "@/services/matomo"
 import "./tokens"
 import "../search-submit"
-import "../global-filters"
 import { StoreService } from "@/services/store"
 import { savedSearches } from "@/search/saved-searches"
 
@@ -34,7 +33,6 @@ type ExtendedStandardScope = IScope & {
 angular.module("korpApp").component("extendedStandard", {
     template: html`
         <div>
-            <global-filters></global-filters>
             <extended-tokens
                 cqp="$ctrl.cqp"
                 cqp-change="$ctrl.cqpChange(cqp)"
@@ -89,7 +87,6 @@ angular.module("korpApp").component("extendedStandard", {
                     ctrl.within = ctrl.withins[0]
                 }
             })
-            store.watch("globalFilter", () => updateExtendedCQP())
             store.watch("within", () => (ctrl.within = store.within || ctrl.withins[0]))
 
             $scope.$watch("freeOrder", () => {
@@ -109,7 +106,7 @@ angular.module("korpApp").component("extendedStandard", {
                 // For extended, `search` is just "cqp" and the query is in `cqp`
                 if (store.search != "cqp" || !store.cqp) return
                 ctrl.cqpChange(store.cqp)
-                // Wait for global filters
+                // Let the restored state settle before triggering the search.
                 $timeout(() => triggerSearch())
             })
 
@@ -120,12 +117,7 @@ angular.module("korpApp").component("extendedStandard", {
                 store.search = "cqp"
                 store.cqp = ctrl.cqp
 
-                let cqp = ctrl.cqp
-                if (store.globalFilter) {
-                    cqp = stringify(mergeCqpExprs(parse(cqp || "[]"), store.globalFilter))
-                }
-
-                const newSearch = { cqp }
+                const newSearch = { cqp: ctrl.cqp }
                 if (!isEqual(store.activeSearch, newSearch) || force) {
                     store.activeSearch = newSearch
                 }
@@ -173,11 +165,7 @@ angular.module("korpApp").component("extendedStandard", {
             }
 
             const updateExtendedCQP = function () {
-                let val2 = expandOperators(ctrl.cqp || "[]")
-                if (store.globalFilter) {
-                    val2 = stringify(mergeCqpExprs(parse(val2), store.globalFilter))
-                }
-                store.extendedCqp = val2
+                store.extendedCqp = expandOperators(ctrl.cqp || "[]")
             }
         },
     ],

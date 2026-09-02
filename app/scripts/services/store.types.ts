@@ -36,7 +36,7 @@ export type Store = {
     display?: "about"
     /** The current Extended search query as CQP */
     extendedCqp?: string
-    /** CQP fragment built from selected filter values. */
+    /** CQP fragment built from the selected Simple-search filter values. */
     globalFilter?: CqpQuery
     /** A simple attribute–values structure of selected filters. */
     global_filter: Record<string, string[]>
