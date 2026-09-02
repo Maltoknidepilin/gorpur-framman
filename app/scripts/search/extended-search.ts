@@ -17,8 +17,10 @@ export async function loadOptions(attr: AttributeOption, lang: string): Promise<
     if (!corpora.length) return []
 
     const data = await getAttrValues(corpora, name, split)
+    const hiddenValues = new Set(attr.filter_hide_values || [])
 
     return uniq(data)
+        .filter((item) => !hiddenValues.has(item))
         .map((item) => (item === "" ? ["", loc("empty", lang)] : [item, locAttribute(attr, item, lang)]))
         .sort((a, b) => a[1].localeCompare(b[1], lang))
 }
