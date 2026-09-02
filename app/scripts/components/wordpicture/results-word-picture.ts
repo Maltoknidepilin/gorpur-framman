@@ -125,8 +125,6 @@ angular.module("korpApp").component("resultsWordPicture", {
 
             $scope.$watch("sortLocal", () => $scope.sortLocal && makeRequest())
 
-            store.watch("globalFilter", () => makeRequest())
-
             store.watch("activeSearch", (search) => {
                 if (!search) return
                 makeRequest()
@@ -156,13 +154,6 @@ angular.module("korpApp").component("resultsWordPicture", {
 
             function makeRequest() {
                 if (!$scope.activated) return resetView()
-
-                // Global metadata filters belong to Simple search only. Extended and
-                // Advanced searches have no `type` and must not be blocked by a
-                // filter selection retained in the Simple-search controls.
-                if (store.activeSearch?.type && store.globalFilter) {
-                    return resetView(loc("word_pic_global_filter", store.lang))
-                }
 
                 let query: RelationsQuery
                 try {

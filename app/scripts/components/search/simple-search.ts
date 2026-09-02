@@ -2,7 +2,7 @@ import angular, { IController, IScope, ITimeoutService } from "angular"
 import { isEqual } from "lodash"
 import statemachine from "@/statemachine"
 import settings from "@/settings"
-import { createCondition, expandOperators, mergeCqpExprs, parse, stringify, supportsInOrder } from "@/cqp_parser/cqp"
+import { expandOperators, parse, stringify, supportsInOrder } from "@/cqp_parser/cqp"
 import { html, regescape, splitFirst, unregescape } from "@/util"
 import { LocationService } from "@/services/types"
 import { matomoSend } from "@/services/matomo"
@@ -10,8 +10,7 @@ import "@/backend/lexicons"
 import "./autoc"
 import "./related-words"
 import "./search-submit"
-import "./global-filters"
-import { Condition, CqpQuery } from "@/cqp_parser/cqp.types"
+import { CqpQuery } from "@/cqp_parser/cqp.types"
 import { StoreService } from "@/services/store"
 import { savedSearches } from "@/search/saved-searches"
 import { buildSimpleLemgramCqp, buildSimpleWordCqp } from "@/search/simple-search"
@@ -43,7 +42,6 @@ angular.module("korpApp").component("simpleSearch", {
     template: html`
         <div id="korp-simple" class="flex flex-wrap items-center gap-4">
             <div>
-                <global-filters lang="lang"></global-filters>
                 <div class="flex flex-wrap items-center gap-4">
                     <form class="shrink-0">
                         <autoc
@@ -140,7 +138,7 @@ angular.module("korpApp").component("simpleSearch", {
                 const [type, val] = splitFirst("|", store.search || "")
                 if (type != "word" && type != "lemgram") return
 
-                // Wait for global filters and locale data
+                // Wait for locale data
                 $timeout(() => {
                     // Restore input
                     const isPlain = type == "word"
@@ -193,7 +191,6 @@ angular.module("korpApp").component("simpleSearch", {
                     query = buildSimpleWordCqp(currentText, $scope.prefix, $scope.suffix, ctrl.isCaseInsensitive)
                 else if (ctrl.lemgram) query = buildSimpleLemgramCqp(ctrl.lemgram, $scope.prefix, $scope.suffix)
 
-                if (store.globalFilter) mergeCqpExprs(query, store.globalFilter)
                 return stringify(query)
             }
 

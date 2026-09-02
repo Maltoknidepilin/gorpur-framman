@@ -3,6 +3,7 @@ import merge from "lodash/merge"
 import { autocExtended } from "./autoc-extended"
 import { Widget } from "./common"
 import { datasetSelect } from "./dataset-select"
+import { dateInput } from "./date-input"
 import { dateInterval } from "./date-interval"
 import { singleValue } from "./single-value"
 import { structServiceAutocomplete } from "./struct-service-autocomplete"
@@ -20,6 +21,7 @@ try {
 const coreWidgets: Record<string, MaybeConfigurable<Widget>> = {
     autocExtended,
     datasetSelect,
+    dateInput,
     dateInterval,
     singleValue,
     structServiceSelect,
