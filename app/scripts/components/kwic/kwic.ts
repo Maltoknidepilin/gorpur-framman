@@ -3,6 +3,7 @@ import { compact, debounce } from "lodash"
 import statemachine from "@/statemachine"
 import settings from "@/settings"
 import { makeDownload } from "@/kwic/kwic_download"
+import { kwicDownloadAllowed } from "@/kwic/download-policy"
 import { html } from "@/util"
 import "./kwic-pager"
 import "./kwic-word"
@@ -38,6 +39,7 @@ type KwicController = IController & {
     useContext: boolean
     hitsPictureData: HitsPictureItem[]
     _settings: any
+    canDownload: () => boolean
     download: {
         options: { value: string; label: string; disabled?: boolean }[]
         selected: string
@@ -104,23 +106,27 @@ angular.module("korpApp").component("kwic", {
             <div class="flex flex-wrap items-baseline gap-4">
                 <select
                     id="frontendDownloadLinks"
-                    ng-if="!$ctrl.loading && $ctrl._settings['enable_frontend_kwic_download']"
+                    ng-if="!$ctrl.loading && $ctrl.canDownload() && $ctrl._settings['enable_frontend_kwic_download']"
                     ng-change="$ctrl.download.init($ctrl.download.selected, $ctrl.hits)"
                     ng-model="$ctrl.download.selected"
                     ng-options="item.value as item.label | loc:$root.lang disable when item.disabled for item in $ctrl.download.options"
                 ></select>
                 <a
                     class="kwicDownloadLink hidden"
-                    ng-if="$ctrl._settings['enable_frontend_kwic_download']"
+                    ng-if="$ctrl.canDownload() && $ctrl._settings['enable_frontend_kwic_download']"
                     href="{{$ctrl.download.blobName}}"
                     download="{{$ctrl.download.fileName}}"
                     target="_self"
                 ></a>
                 <json-button
-                    ng-if="!$ctrl.loading && $ctrl.response"
+                    ng-if="!$ctrl.loading && $ctrl.response && $ctrl.canDownload()"
                     endpoint="query"
                     data="$ctrl.response"
+                    download-allowed="$ctrl.canDownload()"
                 ></json-button>
+                <span ng-if="!$ctrl.loading && !$ctrl.canDownload()" role="status">
+                    {{'download_restricted' | loc:$root.lang}}
+                </span>
             </div>
         </div>
 
@@ -291,6 +297,21 @@ angular.module("korpApp").component("kwic", {
 
             const selectionManager = new SelectionManager()
 
+            $ctrl.canDownload = () =>
+                !$ctrl.loading &&
+                kwicDownloadAllowed(settings.corpora, $ctrl.params, $ctrl.kwicInput || [], [
+                    ...($ctrl.response?.corpus_order || []),
+                    ...Object.keys($ctrl.response?.corpus_hits || {}),
+                ])
+
+            const clearDownload = () => {
+                if (!$ctrl.download) return
+                if ($ctrl.download.blobName) URL.revokeObjectURL($ctrl.download.blobName)
+                $ctrl.download.blobName = undefined
+                $ctrl.download.fileName = undefined
+                $ctrl.download.selected = ""
+            }
+
             $ctrl.$onInit = () => {
                 addKeydownHandler()
                 $scope.hpp = String(store.hpp)
@@ -298,6 +319,7 @@ angular.module("korpApp").component("kwic", {
             }
 
             $ctrl.$onChanges = (changeObj) => {
+                if (["params", "kwicInput", "response", "loading"].some((key) => key in changeObj)) clearDownload()
                 if (changeObj.kwicInput?.currentValue) {
                     $ctrl.kwic = massageData($ctrl.kwicInput)
                     $ctrl.useContext = $ctrl.context || !store.in_order
@@ -343,6 +365,7 @@ angular.module("korpApp").component("kwic", {
             }
 
             $ctrl.$onDestroy = () => {
+                clearDownload()
                 statemachine.send("DESELECT_WORD")
             }
 
@@ -398,10 +421,8 @@ angular.module("korpApp").component("kwic", {
                 ],
                 selected: "",
                 init: (value, hits) => {
-                    if ($ctrl.download.blobName) {
-                        URL.revokeObjectURL($ctrl.download.blobName)
-                    }
-                    if (value === "") {
+                    clearDownload()
+                    if (value === "" || !$ctrl.canDownload() || !settings.enable_frontend_kwic_download) {
                         return
                     }
                     const [dataType, fileType] = value.split("/") as ["annotations" | "kwic", "csv" | "tsv"]
@@ -409,7 +430,11 @@ angular.module("korpApp").component("kwic", {
                     $ctrl.download.fileName = fileName
                     $ctrl.download.blobName = blobName
                     $ctrl.download.selected = ""
-                    $timeout(() => ($element[0].getElementsByClassName("kwicDownloadLink")[0] as HTMLElement).click())
+                    $timeout(() => {
+                        if ($ctrl.canDownload() && $ctrl.download.blobName === blobName) {
+                            ;($element[0].getElementsByClassName("kwicDownloadLink")[0] as HTMLElement)?.click()
+                        }
+                    })
                 },
                 blobName: undefined,
                 fileName: undefined,

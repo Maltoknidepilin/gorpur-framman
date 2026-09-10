@@ -40,6 +40,8 @@ export type Corpus = {
     /** Must be present in parallel corpus */
     lang?: string
     license?: LangString
+    /** Permission to download search results, derived from structured corpus rights. */
+    download_allowed?: boolean
     limited_access?: boolean
     linked_to?: string[]
     pivot?: boolean

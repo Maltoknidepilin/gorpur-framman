@@ -373,6 +373,7 @@
     "baseforms": "leitorð",
     "wordforms": "orðasnið",
 
+    "download_restricted": "Leitúrslit kunnu ikki takast niður, tí leitingin fevnir um ein málgrunn við avmarkaðum ella ógreiðum nýtslurættindum.",
     "download_kwic": "Tak leitúrslit niður sum ...",
     "formatdescr_json": "JavaScript Object Notation",
     "download_kwic_csv": "setning í hvørji røð (CSV)",

@@ -1,9 +1,12 @@
 import angular, { IController, IScope } from "angular"
 import { downloadFile, html } from "@/util"
+import settings from "@/settings"
+import { kwicDownloadAllowed } from "@/kwic/download-policy"
 
 type JsonButtonController = IController & {
     data: any
     endpoint: string
+    downloadAllowed?: boolean
 }
 
 type JsonButtonScope = IScope & {
@@ -20,6 +23,7 @@ angular.module("korpApp").component("jsonButton", {
     bindings: {
         data: "<",
         endpoint: "@",
+        downloadAllowed: "<?",
     },
     controller: [
         "$scope",
@@ -27,6 +31,15 @@ angular.module("korpApp").component("jsonButton", {
             const $ctrl = this as JsonButtonController
 
             $scope.openJson = async function () {
+                if ($ctrl.downloadAllowed === false) return
+                if (
+                    Array.isArray($ctrl.data?.kwic) &&
+                    !kwicDownloadAllowed(settings.corpora, {}, $ctrl.data.kwic, [
+                        ...($ctrl.data.corpus_order || []),
+                        ...Object.keys($ctrl.data.corpus_hits || {}),
+                    ])
+                )
+                    return
                 // TODO Check that we don't get $$hashKey etc
                 const json = JSON.stringify($ctrl.data, null, 2)
                 downloadFile(json, `korp-${$ctrl.endpoint}.json`, "application/json")

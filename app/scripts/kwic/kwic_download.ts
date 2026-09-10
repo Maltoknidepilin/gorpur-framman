@@ -6,6 +6,8 @@ import { CorpusHeading, isCorpusHeading, isKwic, Row } from "@/kwic/kwic"
 import { ApiKwic } from "@/backend/types"
 import { QueryParams } from "@/backend/types/query"
 import { RelationsSentencesParams } from "@/backend/types/relations-sentences"
+import settings from "@/settings"
+import { kwicDownloadAllowed } from "./download-policy"
 
 // The annotations option is not available for parallel
 type AnnotationsRow = ApiKwic | CorpusHeading
@@ -184,6 +186,9 @@ export function makeDownload(
     requestInfo: KwicParams,
     totalHits: number,
 ) {
+    if (!kwicDownloadAllowed(settings.corpora, requestInfo, data)) {
+        throw new Error("Search-result downloads are disabled by corpus permissions")
+    }
     const table = transformData(dataType, data, requestInfo, totalHits)
     if (!table) throw new Error("Could not transform data to table")
     const csv = makeContent(fileType, table)
