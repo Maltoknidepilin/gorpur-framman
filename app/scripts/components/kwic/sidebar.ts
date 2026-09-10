@@ -250,6 +250,15 @@ angular.module("korpApp").component("sidebar", {
                 }
 
                 pairs = pairs.filter(([key]) => corpus_attrs[key])
+                if (type === "struct") {
+                    // Korp returns requested but absent structural attributes as
+                    // empty strings. Do not render an unhelpful "Label: ∅" row.
+                    pairs = pairs.filter(([, value]) =>
+                        typeof value === "string"
+                            ? value.split("|").some((item) => item.trim())
+                            : value != null,
+                    )
+                }
                 pairs = pairs.filter(
                     ([key]) => corpus_attrs[key]["display_type"] != "hidden" && !corpus_attrs[key]["hide_sidebar"],
                 )
