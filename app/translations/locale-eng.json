@@ -331,7 +331,7 @@
     "date_precision_year": "Year",
     "date_precision_month": "Year and month",
     "date_precision_day": "Full date",
-    "download_restricted": "Downloads are disabled because this search includes a corpus with restricted or unknown usage rights.",
+    "download_restricted": "To download search results, you must only search in open corpora.",
     "download_kwic": "Download hit page as…",
     "download_kwic_csv": "One sentence per row (CSV)",
     "download_annotations_csv": "One token per row with annotations (CSV)",

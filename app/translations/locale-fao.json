@@ -377,7 +377,7 @@
     "date_precision_year": "Ár",
     "date_precision_month": "Ár og mánaður",
     "date_precision_day": "Full dagfesting",
-    "download_restricted": "Leitúrslit kunnu ikki takast niður, tí leitingin fevnir um ein málgrunn við avmarkaðum ella ógreiðum nýtslurættindum.",
+    "download_restricted": "Fyri at kunna taka leitúrslit niður, mást tú bara leita í opnum málgrunnum.",
     "download_kwic": "Tak leitúrslit niður sum ...",
     "formatdescr_json": "JavaScript Object Notation",
     "download_kwic_csv": "setning í hvørji røð (CSV)",
