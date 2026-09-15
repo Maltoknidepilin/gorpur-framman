@@ -1,8 +1,26 @@
 import assert from "node:assert/strict"
 import test from "node:test"
 import { dateQuery, dateQueryValue } from "../app/scripts/search/date-query.ts"
+import stringify from "../../gorps-stillingar-framman/app/custom/stringify.js"
 
 const matches = (query, date) => new RegExp(`^(?:${dateQuery(query)})$`).test(date)
+
+test("estimated periods display a hyphen while leaving other values intact", () => {
+    assert.equal(stringify.foEstimatedPeriod("1998/2021"), "1998-2021")
+    assert.equal(stringify.foEstimatedPeriod("2020/2026"), "2020-2026")
+    assert.equal(stringify.foEstimatedPeriod("1990/2006"), "1990-2006")
+    for (const value of ["1998-2021", "2026-09-15", "unknown", ""]) {
+        assert.equal(stringify.foEstimatedPeriod(value), value)
+    }
+})
+
+test("fetched dates hide time without converting timezone or inventing a date", () => {
+    for (const value of ["2026-09-15T00:30:42+02:00", "2026-09-15 12:00:00Z", "2026-09-15"]) {
+        assert.equal(stringify.foDateOnly(value), "2026-09-15")
+    }
+    assert.equal(stringify.foDateOnly(undefined), "")
+    for (const value of ["2026", "unknown", ""]) assert.equal(stringify.foDateOnly(value), value)
+})
 
 test("year searches include stored years, months and full dates in that year", () => {
     for (const date of ["2022", "2022-11", "2022-01-01", "2022-12-31"]) assert.ok(matches("2022", date))

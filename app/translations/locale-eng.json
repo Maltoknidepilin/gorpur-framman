@@ -3,7 +3,6 @@
     "download_audio_file": "Download audio file",
 
     "play_sentence": "Play sentence",
-    "play_audio_normally": "Continue listening",
     "audio_playback_failed": "Audio could not be played. Please try again.",
 
     "lang_EN": "English",

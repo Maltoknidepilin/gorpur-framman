@@ -205,7 +205,7 @@ test("existing sidebar adapter hides untimed action and distinguishes speech fro
     assert.equal(scopeFor("meeting", { start: "1", end: "2" }).sentenceRange, undefined)
 })
 
-test("sidebar continuation is enabled only after successful sentence playback and resets for a new hit", async () => {
+test("the native player continues after sentence playback stops and changing hits cleans it up", async () => {
     class TestPlayback extends api.AudioPlayback {
         constructor(audio, padding, changed) {
             super(audio, padding, changed, { request: () => 1, cancel() {} })
@@ -225,33 +225,27 @@ test("sidebar continuation is enabled only after successful sentence playback an
             $on(name, fn) { events.set(name, fn) },
         }
         assert.equal(definition.block, true) // avoid the sidebar's hanging paragraph indentation
-        assert.match(definition.template, /ng-disabled="!sentenceStarted"/)
         assert.match(definition.template, /download_audio_file/)
         definition.controller.at(-1)(scope, [{ querySelector: () => audio }])
         afterDigest.forEach(fn => fn())
         return { audio, scope, destroy: () => events.get("$destroy")() }
     }
     const first = mount()
-    assert.equal(first.scope.sentenceStarted, false)
     assert.equal(first.scope.sentenceTime, "1:00–1:32") // raw timing, without player padding
-    await first.scope.playNormal()
     assert.equal(first.audio.paused, true)
     await first.scope.playSentence()
-    assert.equal(first.scope.sentenceStarted, true)
     assert.equal(first.audio.currentTime, 59.873456) // display rounding does not affect seeking
     first.audio.currentTime = 93; first.audio.emit("timeupdate")
     assert.equal(first.audio.paused, true)
-    assert.equal(first.scope.sentenceStarted, true)
-    await first.scope.playNormal()
+    await first.audio.play() // the audio element's play button replaces the continuation button
+    first.audio.currentTime = 95; first.audio.emit("timeupdate")
     assert.equal(first.audio.paused, false)
     first.destroy()
     assert.equal(first.audio.listeners(), 0)
     const second = mount()
-    assert.equal(second.scope.sentenceStarted, false)
     second.audio.play = () => Promise.reject(new Error("Playback blocked"))
     await second.scope.playSentence()
     assert.equal(second.scope.playbackFailed, true)
-    assert.equal(second.scope.sentenceStarted, false)
     second.destroy()
 })
 

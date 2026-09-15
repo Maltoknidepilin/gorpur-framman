@@ -101,6 +101,7 @@ export type Attribute = {
     sidebar_value_map?: Record<string, Record<string, string>>
     sidebar_info_url?: string
     sidebar_hide_label?: boolean
+    sidebar_link_text?: LangString
     stats_cqp?: string
     stats_stringify?: string
     stringify?: string
