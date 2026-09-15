@@ -1,4 +1,7 @@
 {
+    "audio_recording_range": "Í upptøku",
+    "download_audio_file": "Tak ljóðfílu niður",
+
     "play_sentence": "Lurta eftir setninginum",
     "play_audio_normally": "Lurta víðari",
     "audio_playback_failed": "Ljóðið kundi ikki spælast. Royn aftur.",

@@ -47,6 +47,44 @@ function setup(padding) {
     return { audio, player, frames, tick }
 }
 
+test("default animation callbacks keep Window as their receiver when scheduling and cancelling", async () => {
+    const frames = new Map()
+    let next = 0, cancellations = 0
+    const window = {
+        requestAnimationFrame(fn) {
+            assert.equal(this, window, "requestAnimationFrame requires Window")
+            frames.set(++next, fn)
+            return next
+        },
+        cancelAnimationFrame(id) {
+            assert.equal(this, window, "cancelAnimationFrame requires Window")
+            cancellations++
+            frames.delete(id)
+        },
+    }
+    // Expose both globals, as a browser does: the old bare-function code must fail this test.
+    const nativeApi = load("../app/scripts/kwic/audio-playback.ts", {}, { window, ...window })
+    const audio = new FakeAudio(), player = new nativeApi.AudioPlayback(audio)
+    assert.equal(await player.playSentence(1, 3), true)
+    assert.equal(frames.size, 1)
+    const tick = [...frames.values()][0]
+    frames.clear(); tick() // recurring requests also need the correct receiver
+    assert.equal(frames.size, 1)
+    audio.pause()
+    assert.equal(cancellations, 1); assert.equal(frames.size, 0)
+    await audio.play()
+    assert.equal(frames.size, 1)
+    player.destroy()
+    assert.equal(cancellations, 2); assert.equal(frames.size, 0)
+    assert.equal(audio.listeners(), 0)
+})
+
+test("recording time labels use minutes and seconds, with hours for long recordings", () => {
+    for (const [seconds, expected] of [[0.34, "0:00"], [32.59, "0:32"], [60, "1:00"],
+        [3599.99, "59:59"], [3600, "1:00:00"], [3661.23, "1:01:01"]])
+        assert.equal(api.formatAudioTime(seconds), expected)
+})
+
 test("sentence click seeks with pre-roll and stops at end plus post-roll using currentTime", async () => {
     const { audio, player, tick, frames } = setup()
     assert.equal(await player.playSentence(10.123456, 12.345678), true)
@@ -165,6 +203,56 @@ test("existing sidebar adapter hides untimed action and distinguishes speech fro
     assert.equal(scopeFor("meeting", { start: "0.34", end: "32.59", second: "138" }).sentenceRange.start, 138.34)
     assert.equal(scopeFor("speech", {}).sentenceRange, undefined)
     assert.equal(scopeFor("meeting", { start: "1", end: "2" }).sentenceRange, undefined)
+})
+
+test("sidebar continuation is enabled only after successful sentence playback and resets for a new hit", async () => {
+    class TestPlayback extends api.AudioPlayback {
+        constructor(audio, padding, changed) {
+            super(audio, padding, changed, { request: () => 1, cancel() {} })
+        }
+    }
+    const adapter = load("../../gorps-stillingar-framman/app/custom/audio.js", {
+        "@/settings": { audio_playback: {} },
+        "@/kwic/audio-playback": { ...api, AudioPlayback: TestPlayback },
+    }, { URL, process: { env: { ENVIRONMENT: "production" } } }).default
+    function mount() {
+        const audio = new FakeAudio(), afterDigest = [], events = new Map()
+        const definition = adapter({ sentence_start: "start", sentence_end: "end", time_base: "speech" })
+        const scope = {
+            value: audio.src, sentenceData: { start: "60.123456", end: "92.59" },
+            $$postDigest(fn) { afterDigest.push(fn) },
+            $evalAsync(fn) { fn() },
+            $on(name, fn) { events.set(name, fn) },
+        }
+        assert.equal(definition.block, true) // avoid the sidebar's hanging paragraph indentation
+        assert.match(definition.template, /ng-disabled="!sentenceStarted"/)
+        assert.match(definition.template, /download_audio_file/)
+        definition.controller.at(-1)(scope, [{ querySelector: () => audio }])
+        afterDigest.forEach(fn => fn())
+        return { audio, scope, destroy: () => events.get("$destroy")() }
+    }
+    const first = mount()
+    assert.equal(first.scope.sentenceStarted, false)
+    assert.equal(first.scope.sentenceTime, "1:00–1:32") // raw timing, without player padding
+    await first.scope.playNormal()
+    assert.equal(first.audio.paused, true)
+    await first.scope.playSentence()
+    assert.equal(first.scope.sentenceStarted, true)
+    assert.equal(first.audio.currentTime, 59.873456) // display rounding does not affect seeking
+    first.audio.currentTime = 93; first.audio.emit("timeupdate")
+    assert.equal(first.audio.paused, true)
+    assert.equal(first.scope.sentenceStarted, true)
+    await first.scope.playNormal()
+    assert.equal(first.audio.paused, false)
+    first.destroy()
+    assert.equal(first.audio.listeners(), 0)
+    const second = mount()
+    assert.equal(second.scope.sentenceStarted, false)
+    second.audio.play = () => Promise.reject(new Error("Playback blocked"))
+    await second.scope.playSentence()
+    assert.equal(second.scope.playbackFailed, true)
+    assert.equal(second.scope.sentenceStarted, false)
+    second.destroy()
 })
 
 test("row fallback is limited to the same structural span as the match", () => {

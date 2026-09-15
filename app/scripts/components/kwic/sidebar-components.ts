@@ -15,6 +15,8 @@ type SidebarComponentDefinition = MaybeConfigurable<SidebarComponent>
 type SidebarComponent = {
     template: string
     controller: IController
+    /** Controls/layouts need a block wrapper rather than a hanging text paragraph. */
+    block?: boolean
 }
 
 // Load custom components.

@@ -14,6 +14,14 @@ export function audioRange(start: unknown, end: unknown): AudioRange | undefined
     return a != undefined && b != undefined && a >= 0 && b > a ? { start: a, end: b } : undefined
 }
 
+/** Display whole seconds only; seeking continues to use the unrounded timestamps. */
+export function formatAudioTime(seconds: number): string {
+    const total = Math.floor(Math.max(0, seconds))
+    const minutes = Math.floor(total / 60)
+    const tail = `${minutes % 60}:${String(total % 60).padStart(2, "0")}`
+    return minutes < 60 ? tail : `${Math.floor(minutes / 60)}:${tail.padStart(5, "0")}`
+}
+
 export function paddedRange(range: AudioRange, padding: AudioPadding, duration?: number): AudioRange {
     const pre = audioNumber(padding.pre_roll), post = audioNumber(padding.post_roll)
     return {
@@ -46,7 +54,12 @@ export class AudioPlayback {
         private changed: () => void = () => {},
         clock?: FrameClock,
     ) {
-        this.clock = clock || { request: requestAnimationFrame, cancel: cancelAnimationFrame }
+        // WebIDL requires Window as the receiver. Storing the bare functions
+        // and calling clock.request()/cancel() incorrectly binds them to clock.
+        this.clock = clock || {
+            request: callback => window.requestAnimationFrame(callback),
+            cancel: id => window.cancelAnimationFrame(id),
+        }
         this.source = audio.src
         this.listeners = {
             play: () => this.watch(),

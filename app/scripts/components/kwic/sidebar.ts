@@ -328,16 +328,16 @@ angular.module("korpApp").component("sidebar", {
             }
 
             $ctrl.renderItem = (type, key, value, attrs, wordData, sentenceData, tokens) => {
-                const output =
-                    attrs.label && !attrs["sidebar_hide_label"]
-                        ? $(`<p><strong>${locObj(attrs.label, $ctrl.lang)}</strong>: </p>`)
-                        : $("<p></p>")
-
                 const component =
                     (attrs["sidebar_component"] && getConfigurable(sidebarComponents, attrs["sidebar_component"])) ||
                     sidebarDefaultComponent
 
-                const { template, controller } = component
+                const { template, controller, block } = component
+                const tag = block ? "div" : "p"
+                const output =
+                    attrs.label && !attrs["sidebar_hide_label"]
+                        ? $(`<${tag}><strong>${locObj(attrs.label, $ctrl.lang)}</strong>: </${tag}>`)
+                        : $(`<${tag}></${tag}>`)
                 const scope = $scope.$new()
                 itemScopes.push(scope)
                 const locals = { $scope: scope, $element: output }
