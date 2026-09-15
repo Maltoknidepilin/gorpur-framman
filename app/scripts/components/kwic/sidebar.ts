@@ -20,6 +20,7 @@ import { TextTask } from "@/task/text-task"
 import { corpusListing } from "@/corpora/corpus_listing"
 import deptreeImg from "@/../img/deptree.svg"
 import { sidebarComponents, sidebarDefaultComponent } from "./sidebar-components"
+import { contextAttributes } from "@/kwic/context-attributes"
 
 type SidebarController = IController & {
     // Bindings
@@ -123,14 +124,23 @@ angular.module("korpApp").component("sidebar", {
             $scope: SidebarScope,
         ) {
             let $ctrl = this as SidebarController
+            let itemScopes: IScope[] = []
+            const clearItems = () => {
+                itemScopes.forEach(scope => scope.$destroy())
+                itemScopes = []
+                $scope.posData = null
+                $scope.structData = null
+            }
+            $scope.$on("$destroy", clearItems)
 
             $scope.posData = null
             $scope.structData = null
 
-            statemachine.listen("select_word", function (data) {
+            const stopListening = statemachine.listen("select_word", function (data) {
                 safeApply($rootScope, () => {
                     $ctrl.data = data
                     if (data == null) {
+                        clearItems()
                         $ctrl.onHide()
                     } else {
                         $ctrl.onShow()
@@ -138,6 +148,7 @@ angular.module("korpApp").component("sidebar", {
                     }
                 })
             })
+            $scope.$on("$destroy", stopListening)
 
             $ctrl.$onChanges = (changesObj) => {
                 if (changesObj["lang"]) {
@@ -168,8 +179,15 @@ angular.module("korpApp").component("sidebar", {
             }
 
             $ctrl.updateContent = ({ sentenceData, wordData, corpus, tokens, inReadingMode }) => {
+                clearItems()
                 // TODO: this is pretty broken
                 const corpusObj = settings.corpora[corpus] || corpusListing.get(corpus)
+                const contextual = Object.entries(corpusObj.struct_attributes)
+                    .filter(([, attr]) => attr.show_in_context).map(([name]) => name)
+                if (contextual.length) {
+                    sentenceData = contextAttributes(tokens, tokens.indexOf(wordData), sentenceData, contextual,
+                        tokens.findIndex(token => token._match))
+                }
                 const sidebarWindow = window as Window & {
                     __foHiddenMetaSig?: string | null
                     __foHiddenMeta?: Record<string, unknown>
@@ -320,8 +338,9 @@ angular.module("korpApp").component("sidebar", {
                     sidebarDefaultComponent
 
                 const { template, controller } = component
-                const scope = $rootScope.$new()
-                const locals = { $scope: scope }
+                const scope = $scope.$new()
+                itemScopes.push(scope)
+                const locals = { $scope: scope, $element: output }
                 Object.assign(scope, {
                     type,
                     key,

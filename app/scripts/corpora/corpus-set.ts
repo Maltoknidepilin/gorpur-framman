@@ -245,6 +245,8 @@ export class CorpusSet {
             show.push(...Object.keys(corpus.attributes))
 
             show_struct.push(...Object.keys(corpus["struct_attributes"]))
+            show.push(...Object.entries(corpus.struct_attributes)
+                .filter(([, attr]) => attr.show_in_context).map(([name]) => name))
             if (corpus["reading_mode"]) show_struct.push("text__id")
         }
 

@@ -8,6 +8,11 @@ const listenerMap: { [K in EventName]?: Listener<K>[] } = {}
 function listen<K extends EventName>(eventName: K, fn: Listener<K>) {
     listenerMap[eventName] ??= []
     listenerMap[eventName]?.push(fn)
+    return () => {
+        const listeners = listenerMap[eventName]
+        const index = listeners?.indexOf(fn) ?? -1
+        if (index >= 0) listeners?.splice(index, 1)
+    }
 }
 
 function broadcast<K extends EventName>(eventName: K, event: EventMap[K]) {

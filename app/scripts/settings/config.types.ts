@@ -83,6 +83,8 @@ export type Attribute = {
     hide_extended?: boolean
     hide_sidebar?: boolean
     hide_statistics?: boolean
+    /** Also request token-level structural boundaries for contextual sidebar values. */
+    show_in_context?: boolean
     internal_search?: boolean
     is?: string
     is_struct_attr?: boolean

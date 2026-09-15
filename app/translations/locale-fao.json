@@ -1,4 +1,8 @@
 {
+    "play_sentence": "Lurta eftir setninginum",
+    "play_audio_normally": "Lurta víðari",
+    "audio_playback_failed": "Ljóðið kundi ikki spælast. Royn aftur.",
+
     "lang_EN": "enskt",
     "lang_FI": "finskt",
     "lang_FR": "franskt",

@@ -9,6 +9,7 @@ import { OperatorKorp } from "@/cqp_parser/cqp.types"
 import { StatisticsProcessed } from "@/statistics/statistics.types"
 
 export type AppSettings = {
+    audio_playback?: { pre_roll?: number; post_roll?: number }
     auth_module?: string | { module: string; options: Record<string, any> }
     autocomplete?: boolean
     backendURLMaxLength: number
