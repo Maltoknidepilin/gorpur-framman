@@ -27,6 +27,20 @@ try {
     console.log("No module for sidebar components available")
 }
 
+/** Keep the complete URL in the link; CSS truncates only its visible text. */
+export const sidebarUrlComponent: SidebarComponent = {
+    block: true,
+    template: html`<a ng-if="url" ng-href="{{url}}" title="{{url}}"
+        class="sidebar_url" target="_blank" rel="noopener noreferrer">{{url}}</a>`,
+    controller: ["$scope", function ($scope: IScope & { value: string; url?: string }) {
+        try {
+            const url = new URL($scope.value)
+            if (["http:", "https:"].includes(url.protocol) && !url.username && !url.password)
+                $scope.url = $scope.value
+        } catch (_) { /* Missing or malformed metadata has no broken link. */ }
+    }],
+}
+
 type SidebarDefaultComponentScope = IScope & {
     attrs: Attribute
     decodeURI: typeof decodeURI
@@ -105,9 +119,6 @@ export const sidebarDefaultComponent: SidebarComponent = {
                         pos_attrs: $scope.wordData,
                         struct_attrs: $scope.sentenceData,
                     })
-                if ($scope.attrs.type == "url")
-                    value = `<a href="${value}" class="exturl sidebar_url" target="_blank">
-                        ${decodeURI(value)}</a>`
                 return value
             }
 

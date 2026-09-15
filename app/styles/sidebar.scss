@@ -20,6 +20,26 @@
         line-height: 1.1em;
     }
 
+    .sidebar-url-row {
+        display: flex;
+        align-items: baseline;
+        gap: 0.25em;
+        min-width: 0;
+
+        > strong {
+            flex: 0 0 auto;
+        }
+
+        .sidebar_url {
+            display: block;
+            flex: 1 1 0%;
+            min-width: 0;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+    }
+
     .fo-audio {
         display: flex;
         flex-direction: column;

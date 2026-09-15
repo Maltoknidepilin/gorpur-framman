@@ -19,7 +19,7 @@ import { Token } from "@/backend/types"
 import { TextTask } from "@/task/text-task"
 import { corpusListing } from "@/corpora/corpus_listing"
 import deptreeImg from "@/../img/deptree.svg"
-import { sidebarComponents, sidebarDefaultComponent } from "./sidebar-components"
+import { sidebarComponents, sidebarDefaultComponent, sidebarUrlComponent } from "./sidebar-components"
 import { contextAttributes } from "@/kwic/context-attributes"
 
 type SidebarController = IController & {
@@ -62,7 +62,6 @@ type SidebarController = IController & {
         sentenceData: Record<string, string>,
         tokens: Token[],
     ) => JQLite
-    applyEllipse: () => void
 }
 
 type SidebarScope = IScope & {
@@ -245,7 +244,6 @@ angular.module("korpApp").component("sidebar", {
                     )
                 }
                 ;($element as JQueryExtended).localize()
-                $ctrl.applyEllipse()
             }
 
             $ctrl.renderCorpusContent = (
@@ -330,14 +328,15 @@ angular.module("korpApp").component("sidebar", {
             $ctrl.renderItem = (type, key, value, attrs, wordData, sentenceData, tokens) => {
                 const component =
                     (attrs["sidebar_component"] && getConfigurable(sidebarComponents, attrs["sidebar_component"])) ||
-                    sidebarDefaultComponent
+                    (attrs.type === "url" ? sidebarUrlComponent : sidebarDefaultComponent)
 
                 const { template, controller, block } = component
                 const tag = block ? "div" : "p"
                 const output =
                     attrs.label && !attrs["sidebar_hide_label"]
-                        ? $(`<${tag}><strong>${locObj(attrs.label, $ctrl.lang)}</strong>: </${tag}>`)
+                        ? $(`<${tag}><strong>${locObj(attrs.label, $ctrl.lang)}:</strong> </${tag}>`)
                         : $(`<${tag}></${tag}>`)
+                if (component === sidebarUrlComponent) output.addClass("sidebar-url-row")
                 const scope = $scope.$new()
                 itemScopes.push(scope)
                 const locals = { $scope: scope, $element: output }
@@ -354,31 +353,6 @@ angular.module("korpApp").component("sidebar", {
                 // @ts-ignore
                 $controller(controller, locals)
                 return output.append($compile(template)(scope))
-            }
-
-            /** Iteratively shorten displayed URL from the middle until it fits inside the container element */
-            $ctrl.applyEllipse = () => {
-                $element
-                    .find(".sidebar_url")
-                    .css("white-space", "nowrap")
-                    .each(function () {
-                        // TODO This happens before sidebar is actually showing, so parent width is 0 the first time
-                        const totalWidth = $(this).closest("div").width() || 240
-                        // Drop the scheme part ("https://")
-                        let text = $(this)
-                            .text()
-                            .replace(/[^/]*\/\//, "")
-                        // Replace a larger part at each iteration
-                        while (($(this).width() || 0) > totalWidth) {
-                            // Drop first two chars after first slash
-                            const textNew = text.replace(/\/…?../, "/…")
-                            // Abort if there is no change (ellipsis reached the end, or URL is malformed)
-                            if (textNew == text) break
-                            // Replace text
-                            text = textNew
-                            $(this).text(text)
-                        }
-                    })
             }
 
             $scope.$watch("posData", () => {
