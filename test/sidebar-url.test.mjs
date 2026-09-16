@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs"
 import test from "node:test"
 import vm from "node:vm"
 import ts from "typescript"
+import { sidebarSetValues } from "../app/scripts/kwic/sidebar-values.ts"
 
 const { outputText } = ts.transpileModule(
     readFileSync(new URL("../app/scripts/components/kwic/sidebar-components.ts", import.meta.url), "utf8"),
@@ -11,6 +12,7 @@ const { outputText } = ts.transpileModule(
 const mocks = {
     "@/util": { html: String.raw }, "@/i18n": {}, "@/services/stringify": {},
     lodash: {}, "@/statemachine": {}, "custom/sidebar.js": { default: {} },
+    "@/kwic/sidebar-values": { sidebarSetValues },
 }
 const module = { exports: {} }
 vm.runInNewContext(outputText, {

@@ -8,6 +8,7 @@ import { template } from "lodash"
 import statemachine from "@/statemachine"
 import { CqpSearchEvent } from "@/statemachine/types"
 import { Token } from "@/backend/types"
+import { sidebarSetValues } from "@/kwic/sidebar-values"
 
 /** A custom component for showing an attribute in the sidebar. */
 type SidebarComponentDefinition = MaybeConfigurable<SidebarComponent>
@@ -66,7 +67,7 @@ export const sidebarDefaultComponent: SidebarComponent = {
                 <i class="fa-solid fa-info-circle"></i>
             </a>
 
-            <ul>
+            <ul ng-class="{'sidebar-single-value': attrs.sidebar_inline_single && valueArray.length == 1}">
                 <li ng-repeat="item in valueArray">
                     <span ng-if="!attrs['internal_search']" ng-bind-html="renderValue(item) | trust"></span>
                     <span
@@ -99,9 +100,7 @@ export const sidebarDefaultComponent: SidebarComponent = {
         function ($scope: SidebarDefaultComponentScope, store: StoreService) {
             $scope.decodeURI = decodeURI
             const hideValues = $scope.attrs.sidebar_hide_values || []
-            const visibleSetValues = ($scope.value?.split("|") || [])
-                .map((item) => item.trim())
-                .filter((item) => item && !hideValues.includes(item))
+            const visibleSetValues = sidebarSetValues($scope.value, $scope.attrs)
             const isEmptySet = $scope.attrs.type == "set" && visibleSetValues.length === 0
             const isEmptyScalar =
                 $scope.attrs.type != "set" && (!$scope.value?.trim() || hideValues.includes($scope.value))

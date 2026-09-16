@@ -21,6 +21,7 @@ import { corpusListing } from "@/corpora/corpus_listing"
 import deptreeImg from "@/../img/deptree.svg"
 import { sidebarComponents, sidebarDefaultComponent, sidebarUrlComponent } from "./sidebar-components"
 import { contextAttributes } from "@/kwic/context-attributes"
+import { sidebarLabel } from "@/kwic/sidebar-values"
 
 type SidebarController = IController & {
     // Bindings
@@ -334,7 +335,7 @@ angular.module("korpApp").component("sidebar", {
                 const tag = block ? "div" : "p"
                 const output =
                     attrs.label && !attrs["sidebar_hide_label"]
-                        ? $(`<${tag}><strong>${locObj(attrs.label, $ctrl.lang)}:</strong> </${tag}>`)
+                        ? $(`<${tag}><strong>${locObj(sidebarLabel(attrs, value), $ctrl.lang)}:</strong> </${tag}>`)
                         : $(`<${tag}></${tag}>`)
                 if (component === sidebarUrlComponent) output.addClass("sidebar-url-row")
                 const scope = $scope.$new()

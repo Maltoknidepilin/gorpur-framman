@@ -20,6 +20,16 @@
         line-height: 1.1em;
     }
 
+    ul.sidebar-single-value {
+        display: inline;
+        padding: 0;
+        line-height: inherit;
+
+        > li {
+            display: inline;
+        }
+    }
+
     .sidebar-url-row {
         display: flex;
         align-items: baseline;

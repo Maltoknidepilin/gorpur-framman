@@ -90,6 +90,8 @@ export type Attribute = {
     is_struct_attr?: boolean
     label: LangString
     name: string
+    label_plural?: LangString
+    sidebar_inline_single?: boolean
     /** Available operators, default is to copy the `default_options` setting */
     opts?: Record<string, OperatorKorp> | false
     order?: number
