@@ -39,6 +39,7 @@ export const selectController = (autocomplete: boolean): IController => [
     "$scope",
     "store",
     function ($scope: SelectWidgetScope, store: StoreService) {
+        $scope.options = []
         store.watch("corpus", (selected, old) => {
             // TODO Destroy if new corpus selection doesn't support the attribute?
             if (selected.length > 0 && !isEqual(selected, old)) {
@@ -63,13 +64,10 @@ export const selectController = (autocomplete: boolean): IController => [
         // Load values initially
         reloadValues()
 
-        $scope.$watch("orObj.op", (newVal, oldVal) => {
+        $scope.$watch("orObj.op", () => {
             $scope.inputOnly = !["=", "!=", "contains", "not contains"].includes($scope.orObj.op)
-            if (newVal !== oldVal) {
-                if (!autocomplete) {
-                    $scope.input = $scope.options[0][0]
-                }
-            }
+            // Changing equality to inequality must keep the selected value,
+            // including while the available values are still loading.
         })
 
         $scope.getRows = (input) =>
