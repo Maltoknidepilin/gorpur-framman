@@ -98,10 +98,6 @@ export class CorpusTimeChart {
                                 Number(items[0].label) < this.undatedFakeYear
                                     ? `${loc("corpselector_year", lang)} ${items[0].label}`
                                     : loc("corpselector_undated", lang),
-                            footer: (items) =>
-                                Number(items[0].label) < this.undatedFakeYear
-                                    ? loc("corpselector_year_estimate", lang)
-                                    : "",
                         },
                         // See `defaults` in https://github.com/chartjs/Chart.js/blob/master/src/plugins/plugin.tooltip.js
                         animations: {
