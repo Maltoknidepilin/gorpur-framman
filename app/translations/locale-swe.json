@@ -294,6 +294,7 @@
     "corpselector_limited": "Korpusen är skyddad.",
     "corpselector_of": " av ",
     "corpselector_year": "Antal token i material daterat",
+    "corpselector_year_estimate": "Manuellt uppskattade tidsintervall fördelas jämnt över åren.",
     "corpselector_undated": "Antal token i odaterat material",
     "corpselector_all": "Tillgängligt",
     "corpselector_selected": "Valt",

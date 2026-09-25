@@ -8,6 +8,8 @@ export type TimespanParams = {
     from?: NumericString
     to?: NumericString
     strategy?: 1 | 2 | 3
+    /** Comma-separated corpus IDs with manually estimated periods to spread across years; requires granularity=y. */
+    spread_corpora?: string
     per_corpus?: boolean
     combined?: boolean
     incremental?: boolean

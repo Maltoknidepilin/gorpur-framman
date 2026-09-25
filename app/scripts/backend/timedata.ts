@@ -18,7 +18,12 @@ export const getTimeData: () => Promise<[[number, number][], number] | undefined
     const corpus = corpusListing.stringify()
     if (!corpus) return undefined
 
-    const data = await korpRequest("timespan", { granularity: "y", corpus })
+    // Only corpora with the manually estimated period attribute get annual estimates.
+    const spread_corpora = corpusListing.corpora
+        .filter((corpus) => "text_tidarskeid" in corpus.struct_attributes)
+        .map((corpus) => corpus.id.toUpperCase())
+        .join()
+    const data = await korpRequest("timespan", { granularity: "y", corpus, spread_corpora: spread_corpora || undefined })
 
     const rest = data.combined[""] || 0
     delete data.combined[""]

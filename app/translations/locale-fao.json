@@ -338,6 +338,7 @@
     "corpselector_limited": "Korpusen är skyddad.",
     "corpselector_of": " av ",
     "corpselector_year": "Tal av tokenum í málgrunnum frá",
+    "corpselector_year_estimate": "Token í handsettum, mettum tíðarskeiðum verða býtt javnt millum árini.",
     "corpselector_undated": "Tal av tokenum í málgrunnum uttan árstal",
     "corpselector_all": "Atkomuligt",
     "corpselector_selected": "Valt",

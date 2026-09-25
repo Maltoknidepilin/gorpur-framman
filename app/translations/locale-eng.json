@@ -305,6 +305,7 @@
     "corpselector_limited": "The corpus is protected.",
     "corpselector_of": " of ",
     "corpselector_year": "Tokens in material dated",
+    "corpselector_year_estimate": "Manually estimated periods are divided evenly across their years.",
     "corpselector_undated": "Tokens in undated material",
     "corpselector_all": "Available",
     "corpselector_selected": "Selected",
