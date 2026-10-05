@@ -8,7 +8,7 @@ import { template } from "lodash"
 import statemachine from "@/statemachine"
 import { CqpSearchEvent } from "@/statemachine/types"
 import { Token } from "@/backend/types"
-import { sidebarSetValues } from "@/kwic/sidebar-values"
+import { sidebarHasValue, sidebarSetValues } from "@/kwic/sidebar-values"
 
 /** A custom component for showing an attribute in the sidebar. */
 type SidebarComponentDefinition = MaybeConfigurable<SidebarComponent>
@@ -99,11 +99,10 @@ export const sidebarDefaultComponent: SidebarComponent = {
         "store",
         function ($scope: SidebarDefaultComponentScope, store: StoreService) {
             $scope.decodeURI = decodeURI
-            const hideValues = $scope.attrs.sidebar_hide_values || []
             const visibleSetValues = sidebarSetValues($scope.value, $scope.attrs)
             const isEmptySet = $scope.attrs.type == "set" && visibleSetValues.length === 0
             const isEmptyScalar =
-                $scope.attrs.type != "set" && (!$scope.value?.trim() || hideValues.includes($scope.value))
+                $scope.attrs.type != "set" && !sidebarHasValue($scope.value, $scope.attrs)
             $scope.isEmpty = isEmptySet || isEmptyScalar
             $scope.valueArray = visibleSetValues
 
