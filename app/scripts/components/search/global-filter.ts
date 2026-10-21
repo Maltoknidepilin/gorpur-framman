@@ -42,8 +42,8 @@ angular.module("korpApp").component("globalFilter", {
                 <!-- Selected values -->
                 <li
                     ng-repeat="value in $ctrl.options"
-                    ng-class="{'bg-blue-50': isSelected(value[0])}"
-                    class="p-1 hover:bg-blue-100 cursor-pointer"
+                    ng-class="{'bg-brand-50': isSelected(value[0])}"
+                    class="p-1 hover:bg-brand-100 cursor-pointer"
                     ng-click="toggleSelected(value[0], $event)"
                     ng-if="isSelectedList(value[0])"
                 >
@@ -55,8 +55,8 @@ angular.module("korpApp").component("globalFilter", {
                 <!-- Unselected values -->
                 <li
                     ng-repeat="value in $ctrl.options"
-                    ng-class="{'bg-blue-50': isSelected(value[0])}"
-                    class="p-1 hover:bg-blue-100 cursor-pointer"
+                    ng-class="{'bg-brand-50': isSelected(value[0])}"
+                    class="p-1 hover:bg-brand-100 cursor-pointer"
                     ng-click="toggleSelected(value[0], $event)"
                     ng-if="!isSelectedList(value[0]) && value[1] > 0"
                 >

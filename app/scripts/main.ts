@@ -2,7 +2,9 @@ import angular from "angular"
 import settings from "@/settings"
 import { fetchInitialData } from "@/data_init"
 import currentMode from "@/mode"
-import { html, simpleModal } from "@/util"
+import { addImgHash, html, simpleModal } from "@/util"
+import { loc } from "@/i18n"
+import { formatError } from "@/services/error-message"
 import { getUrlHash } from "./urlparams"
 import korpLogo from "../img/korp.svg"
 import korpFail from "../img/korp_fail.svg"
@@ -16,7 +18,9 @@ const createSplashScreen = () => {
         console.error("preload element missing")
         return
     }
-    splash.innerHTML = html`<img class="animate-pulse" height="300" width="300" src="${korpLogo}" />`
+    splash.innerHTML = addImgHash(
+        settings.logo?.loading || html`<img class="animate-pulse" height="300" width="300" src="${korpLogo}" />`,
+    )
 
     // Add maintenance news if loading is slow.
     const newsTimeout = 5000
@@ -56,14 +60,14 @@ function initApp() {
 
 // Handle uncaught exceptions and rejections outside Angular
 // Inside Angular, see the `$exceptionHandler` service.
-window.onerror = (message, source, lineno, colno, error) => errorModal(message)
+window.onerror = (message, source, lineno, colno, error) => errorModal(error || message)
 window.onunhandledrejection = (event) => errorModal(event.reason)
 
 function errorModal(message: any) {
-    const escaped = new Option(String(message)).innerHTML
+    const escaped = new Option(formatError(message)).innerHTML
     const content = html`<img class="block mx-auto mb-4" height="300" width="300" src="${korpFail}" />
         <p>${escaped}</p>`
-    simpleModal(content)
+    simpleModal(content, loc("modal_ok"))
 }
 
 createSplashScreen()

@@ -2,6 +2,7 @@ import {
     compact,
     get,
     intersection,
+    isEqual,
     isEmpty,
     maxBy,
     minBy,
@@ -115,6 +116,16 @@ export class CorpusSet {
 
         // Merge datasets from attributes with the same name across all corpora
         for (const name in rest) {
+            // A corpus-specific selector must not turn a mixed selection into
+            // a dropdown containing every other corpus's free-text values.
+            const component = rest[name].extended_component
+            const componentName = typeof component === "string" ? component : component?.name
+            if (
+                componentName === "structServiceSelect" &&
+                attrs.some((attributes) => attributes[name] && !isEqual(attributes[name].extended_component, component))
+            ) {
+                delete rest[name].extended_component
+            }
             if (rest[name].dataset) {
                 const sameNameDatasets = attrs
                     .map((attrs2) => attrs2[name]?.dataset)
@@ -157,6 +168,11 @@ export class CorpusSet {
 
         // Mark attributes as disabled if not common to all attribute sets.
         Object.entries(union).forEach(([key, value]) => {
+            // A corpus may hide its own field without hiding it in other
+            // selected corpora. Ignore corpora which do not define the field.
+            if (attrs.some((attributes) => attributes[key] && !attributes[key].hide_extended)) {
+                delete value.hide_extended
+            }
             if (!intersection[key]) value["disabled"] = true
             else delete value["disabled"]
         })

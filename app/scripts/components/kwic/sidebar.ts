@@ -21,7 +21,7 @@ import { corpusListing } from "@/corpora/corpus_listing"
 import deptreeImg from "@/../img/deptree.svg"
 import { sidebarComponents, sidebarDefaultComponent, sidebarUrlComponent } from "./sidebar-components"
 import { contextAttributes } from "@/kwic/context-attributes"
-import { sidebarHasValue, sidebarLabel } from "@/kwic/sidebar-values"
+import { sidebarHasValue, sidebarLabel, sidebarHiddenByMetadata } from "@/kwic/sidebar-values"
 
 type SidebarController = IController & {
     // Bindings
@@ -270,7 +270,8 @@ angular.module("korpApp").component("sidebar", {
                 if (type === "struct") {
                     // Missing values can be empty strings or XML/CWB sentinels.
                     // Omit the whole row, including its label.
-                    pairs = pairs.filter(([key, value]) => sidebarHasValue(value, corpus_attrs[key]))
+                    pairs = pairs.filter(([key, value]) => sidebarHasValue(value, corpus_attrs[key]) &&
+                        !sidebarHiddenByMetadata(corpus_attrs[key], sentenceData, value))
                 }
                 pairs = pairs.filter(
                     ([key]) => corpus_attrs[key]["display_type"] != "hidden" && !corpus_attrs[key]["hide_sidebar"],

@@ -45,6 +45,7 @@ export type AppSettings = {
     korp_backend_url: string
     languages: Labeled[]
     logo?: {
+        loading?: string
         korp?: string
         organization?: string
         chooser_right?: string

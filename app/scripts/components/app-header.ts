@@ -62,7 +62,7 @@ angular.module("korpApp").component("appHeader", {
 
                     <radio-list options="$ctrl.languages" ng-model="$root.lang"> </radio-list>
 
-                    <a class="transiton duration-200 hover:text-blue-600" ng-click="$ctrl.citeClick()">
+                    <a class="transiton duration-200 hover:text-brand-600" ng-click="$ctrl.citeClick()">
                         {{'about_cite_header' | loc:$root.lang}}
                     </a>
 
@@ -72,7 +72,7 @@ angular.module("korpApp").component("appHeader", {
                             class="px-2 py-1 border border-gray-300 bg-gray-200 rounded text-gray-800"
                         >
                             <span class="font-bold uppercase"> {{'menu' | loc:$root.lang}} </span>
-                            <i class="fa fa-lg fa-bars ml-2 align-middle text-indigo-600"></i>
+                            <i class="fa fa-lg fa-bars ml-2 align-middle text-brand-600"></i>
                         </button>
                         <ul uib-dropdown-menu class="dropdown-menu-right">
                             <li>
@@ -90,7 +90,9 @@ angular.module("korpApp").component("appHeader", {
             </div>
 
             <div class="flex justify-between items-end gap-3 my-3 px-3" id="header_left">
-                <a class="shrink-0 relative ml-4 pl-0.5" ng-click="$ctrl.logoClick()"> ${korpLogoHtml} </a>
+                <a class="header-main-logo shrink-0 relative ml-4 pl-0.5" ng-click="$ctrl.logoClick()">
+                    ${korpLogoHtml}
+                </a>
                 <div id="labs_logo">
                     <svg
                         height="60"
@@ -112,12 +114,9 @@ angular.module("korpApp").component("appHeader", {
                     </svg>
                 </div>
 
-                <div class="grow min-[1150px]:hidden"></div>
                 <corpus-chooser></corpus-chooser>
                 ${chooserRightLogoHtml}
-                <div class="grow hidden min-[1150px]:block"></div>
-
-                ${orgLogoHtml}
+                <div class="header-partner-logos flex items-end gap-3">${orgLogoHtml}</div>
             </div>
         </div>
     `,

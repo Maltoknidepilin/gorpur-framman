@@ -286,7 +286,7 @@ korpApp.run([
                         <button
                             ng-if="${resolvable}"
                             ng-click="closeModal()"
-                            class="btn bg-blue-500 text-white font-bold mt-3"
+                            class="btn bg-brand-600 hover:bg-brand-700 text-white font-bold mt-3"
                         >
                             <span ng-if="${useCustomButton}">{{'${buttonText}' | loc:$root.lang }}</span>
                             <span ng-if="!${useCustomButton}">OK</span>

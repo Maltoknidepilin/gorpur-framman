@@ -1,4 +1,6 @@
 // Core variables and mixins
+// Match brand.600 in tailwind.config.js; Bootstrap needs a Sass colour for its state mixins.
+$brand-primary: #586d69;
 @import "node_modules/bootstrap-sass/assets/stylesheets/bootstrap/variables";
 @import "node_modules/bootstrap-sass/assets/stylesheets/bootstrap/mixins";
 

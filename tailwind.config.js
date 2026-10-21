@@ -26,8 +26,18 @@ module.exports = {
                 orange: {
                     900: "#f2581a",
                 },
-                blue: {
-                    100: "rgb(221, 233, 255)",
+                // Sage greens from the Miklamálgrunnurin and Máltøknidepilin logos.
+                brand: {
+                    50: "#f3f7f6",
+                    100: "#e1ece9",
+                    200: "#c6dbd6",
+                    300: "#a7c7bf",
+                    400: "#87b0a9",
+                    500: "#6f8f89",
+                    600: "#586d69",
+                    700: "#435b56",
+                    800: "#334741",
+                    900: "#24332f",
                 },
             },
         },

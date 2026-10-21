@@ -23,26 +23,70 @@ export const getTimeData: () => Promise<[[number, number][], number] | undefined
         .filter((corpus) => "text_tidarskeid" in corpus.struct_attributes)
         .map((corpus) => corpus.id.toUpperCase())
         .join()
-    const data = await korpRequest("timespan", { granularity: "y", corpus, spread_corpora: spread_corpora || undefined })
+    const data = await korpRequest("timespan", {
+        granularity: "y",
+        corpus,
+        spread_corpora: spread_corpora || undefined,
+    })
+
+    expandTimeStruct(data.combined)
+    applyTimelineEstimates(data.combined, data.corpora)
 
     const rest = data.combined[""] || 0
     delete data.combined[""]
-
-    expandTimeStruct(data.combined)
 
     // Re-structure the combined counts as year-count tuples for plotting
     const combined: [number, number][] = Object.entries(data.combined)
         .filter(([key, val]) => key && val)
         .map(([key, val]) => [parseInt(key), val])
     combined.sort((a, b) => a[0] - b[0])
-    if (combined.length == 0) return [[], 0]
-
     addToCorpora(data.corpora)
 
     // Store time data for non-async use
     timeData = [combined, rest]
     return timeData
 })
+
+/** Replace configured corpus histograms with estimates of their actual token totals. */
+function applyTimelineEstimates(combined: Histogram, corpora: Record<string, Histogram>): void {
+    for (const corpus of corpusListing.corpora) {
+        if (!corpus.timeline_estimate) continue
+        const weights = Object.entries(corpus.timeline_estimate.weights || {})
+        const totalWeight = weights.reduce((sum, [, weight]) => sum + weight, 0)
+        const tokens = Number(corpus.info.Size)
+        if (
+            !weights.length ||
+            !Number.isFinite(totalWeight) ||
+            totalWeight <= 0 ||
+            !Number.isFinite(tokens) ||
+            tokens < 0 ||
+            corpus.info.Size == null ||
+            weights.some(
+                ([year, weight]) => !/^\d{4}$/.test(year) || Number(year) < 1 || !Number.isFinite(weight) || weight < 0,
+            )
+        )
+            continue
+
+        const id = corpus.id.toUpperCase()
+        const previous = corpora[id] || {}
+        expandTimeStruct(previous)
+        for (const [year, count] of Object.entries(previous)) {
+            const key = year as keyof Histogram
+            combined[key] = (combined[key] || 0) - count
+        }
+
+        const years = weights.map(([year]) => Number(year))
+        const estimate: Histogram = {}
+        for (const year of range(Math.min(...years), Math.max(...years) + 1)) {
+            const count = (tokens * (corpus.timeline_estimate.weights[String(year)] || 0)) / totalWeight
+            estimate[`${year}`] = count
+            combined[`${year}`] = (combined[`${year}`] || 0) + count
+        }
+        // Histograms use a trailing zero to mark the end of the last year.
+        estimate[`${Math.max(...years) + 1}`] = 0
+        corpora[id] = estimate
+    }
+}
 
 /** Add each missing year with the previous year's value */
 function expandTimeStruct(struct: Histogram): void {
@@ -74,7 +118,7 @@ function addToCorpora(dataByCorpus: Record<string, Histogram>) {
         corpus.non_time = struct[""]
         corpus.time = omit(struct, "")
         // Enable the special date interval search attribute for corpora that have some timestamped data
-        if (Object.keys(corpus.time).length > 1) {
+        if (!corpus.timeline_estimate && Object.keys(corpus.time).length > 1) {
             corpus.common_attributes ??= {}
             corpus.common_attributes.date_interval = true
         }

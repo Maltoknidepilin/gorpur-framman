@@ -33,6 +33,7 @@ export class TrendTask extends TaskBase<CountTimeResponse> {
         const params: CountTimeParams = {
             cqp: expandCqp(this.cqp),
             default_within: this.defaultWithin,
+            within: this.corpusListing.getWithinParam(this.defaultWithin),
             corpus: this.corpusListing.stringify(),
             granularity: GRANULARITIES[zoom],
             from: formatDate(from),

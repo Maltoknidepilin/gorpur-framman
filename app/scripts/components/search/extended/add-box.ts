@@ -19,7 +19,7 @@ angular.module("korpApp").component("addBox", {
                 class="btn btn-sm image_button insert_token border-gray-300 transition duration-200 hover:bg-gray-200"
                 ng-click="$ctrl.addTokenLocal()"
             >
-                <i class="fa-solid fa-lg fa-plus-circle text-blue-600 mr-1"></i>
+                <i class="fa-solid fa-lg fa-plus-circle text-brand-600 mr-1"></i>
                 <span class="">{{"add_token" | loc:$root.lang}}</span>
             </button>
             <div class="mt-2">

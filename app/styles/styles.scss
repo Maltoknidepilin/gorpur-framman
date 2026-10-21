@@ -12,10 +12,11 @@ input[type="radio"] {
     display: table-cell;
     vertical-align: middle;
     margin-bottom: 2px;
+    accent-color: theme("colors.brand.600");
 }
 
-$primaryColor: rgb(221, 233, 255);
-$primaryLight: rgb(242, 247, 255);
+$primaryColor: theme("colors.brand.100");
+$primaryLight: theme("colors.brand.50");
 
 $color_yellow: #fff3d8;
 
@@ -75,13 +76,12 @@ ol {
 a {
     cursor: pointer;
     text-decoration: none;
-    // color: navy;
-    @apply text-indigo-700;
+    @apply text-brand-400;
     &:visited {
-        color: purple;
+        color: theme("colors.brand.400");
     }
     &:hover {
-        color: indianred;
+        color: theme("colors.brand.800");
     }
 }
 
@@ -116,15 +116,15 @@ img {
 
 /* Qualify with "body" to override .slick-cell pointer style */
 body .link {
-    @apply text-indigo-700;
+    @apply text-brand-400;
     cursor: pointer;
     &:hover {
-        color: indianred !important;
+        color: theme("colors.brand.800") !important;
     }
 }
 
 .radialBkg {
-    background-image: radial-gradient(ellipse at center, #f9fdff 56%, #ebf0f4 100%);
+    background-image: radial-gradient(ellipse at center, #f8fbfa 56%, #e9f0ed 100%);
 }
 
 .inline_block {
@@ -137,11 +137,11 @@ body .link {
 }
 
 .color_blue {
-    background-color: #d0d7f0;
+    background-color: $primaryColor;
 }
 
 .color_blue_light {
-    background-color: #ebeefa;
+    background-color: $primaryLight;
 }
 
 .color_purple {
@@ -153,11 +153,11 @@ body .link {
 }
 
 .color_green {
-    background-color: #edfcd5;
+    background-color: $primaryColor;
 }
 
 .color_green_light {
-    background-color: #f7fceb;
+    background-color: $primaryLight;
 }
 
 .color_yellow {
@@ -207,7 +207,7 @@ input,
 select {
     &:focus {
         outline: none !important;
-        @apply ring border-blue-300;
+        @apply ring ring-brand-400/50 border-brand-600;
     }
 }
 
@@ -329,6 +329,7 @@ time-interval {
 
 .hp_topframe {
     width: 480px;
+    max-width: 100%;
     padding: 0.5em 1em 0.5em 20px;
     color: #222222;
     position: relative;
@@ -349,6 +350,148 @@ time-interval {
 
 .popupchecks {
     width: 480px;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+}
+
+// Move the selector below the main logo before the logo needs to shrink.
+@media (max-width: 1023px) {
+    #header_left {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        align-items: flex-start;
+
+        .header-main-logo {
+            max-width: calc(100% - 1rem);
+            min-width: 0;
+
+            img {
+                max-width: 100%;
+                max-height: 65px;
+                // Configured logos may specify a fixed height inline.
+                height: auto !important;
+            }
+        }
+
+        #labs_logo {
+            display: none;
+        }
+
+        corpus-chooser {
+            order: 1;
+            flex: 0 0 calc(100% - 1rem);
+            min-width: 0;
+            margin-left: 1rem;
+        }
+
+        .header-partner-logos {
+            margin-left: auto;
+        }
+    }
+
+    .lab #header_left #labs_logo {
+        display: block;
+    }
+}
+
+// Keep two visually balanced gaps between the main logo, selector and partners.
+#header_left {
+    gap: 1.5rem;
+}
+
+#header_left #labs_logo {
+    display: none;
+}
+
+.lab #header_left #labs_logo {
+    display: block;
+}
+
+// Setur disappears first at 1536px; MTD keeps its full size until 1440px.
+@media (min-width: 1280px) and (max-width: 1439px) {
+    #header_left .header-mtd-logo {
+        max-width: calc(100vw - 1050px);
+
+        img {
+            max-width: 100%;
+            height: auto !important;
+        }
+    }
+}
+
+@media (max-width: 600px) {
+    .corpus-chooser-actions {
+        flex-direction: column;
+
+        corpus-time-graph {
+            display: block;
+            position: relative;
+            width: 100%;
+            min-width: 0;
+        }
+
+        canvas,
+        button {
+            max-width: 100%;
+        }
+    }
+}
+
+.corpus-info {
+    position: sticky;
+    top: 0;
+    width: 480px;
+    flex-shrink: 0;
+    min-height: 0;
+}
+
+.corpus-info-panel {
+    height: 100%;
+    overflow: auto;
+    overscroll-behavior: contain;
+    overflow-wrap: anywhere;
+
+    cc-info-box {
+        display: block;
+    }
+
+    img {
+        max-width: 100%;
+        height: auto;
+    }
+}
+
+.corpus-info-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    justify-content: flex-end;
+    padding: 8px;
+}
+
+.corpus-info-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 901;
+    width: auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.35);
+
+    .corpus-info-panel {
+        width: 100%;
+        max-width: 720px;
+        min-width: 0;
+        height: auto;
+        max-height: 100%;
+    }
+
+    cc-info-box > div {
+        margin: 16px;
+    }
 }
 
 .tree {
@@ -619,7 +762,7 @@ table {
 }
 
 .alt {
-    background-color: #dde9ff;
+    background-color: $primaryColor;
     td {
         border: none;
     }
@@ -641,7 +784,7 @@ table {
         margin-left: -3px;
     }
     &:hover {
-        color: indianred;
+        color: theme("colors.brand.800");
     }
 }
 
@@ -662,12 +805,12 @@ table {
     padding-left: 3px;
     margin-left: -3px;
     &:hover {
-        color: indianred;
+        color: theme("colors.brand.800");
     }
 }
 
 .link_selected {
-    background-color: rgb(68, 85, 150);
+    background-color: theme("colors.brand.600");
     border-radius: 11px;
     color: white !important;
 }
@@ -827,10 +970,10 @@ span.absStat {
     margin-right: 10px;
     padding-left: 0;
     a:visited {
-        color: rgb(67 56 202 / var(--tw-text-opacity));
+        color: theme("colors.brand.400");
     }
     a:hover {
-        color: indianred;
+        color: theme("colors.brand.800");
     }
     li {
         &.visible {
@@ -872,7 +1015,7 @@ span.absStat {
 
 .query_arg {
     padding: 5px;
-    background-color: #f7fceb;
+    background-color: $primaryLight;
     border: solid 1px #999;
     margin-bottom: 5px;
     padding-right: 13px;
@@ -887,7 +1030,7 @@ span.absStat {
 }
 
 .tag-box {
-    background-color: #dbeafe;
+    background-color: $primaryColor;
 }
 
 .query_arg:only-of-type .or_arg_outer:only-child .remove_arg {
@@ -1211,7 +1354,7 @@ slider {
         &.active {
             a {
                 font-weight: bold;
-                @apply text-white bg-indigo-400 border-indigo-500 shadow-inner;
+                @apply text-white bg-brand-600 border-brand-700 shadow-inner;
             }
         }
         a,
@@ -1302,7 +1445,7 @@ slider {
         top: 0;
         bottom: 0;
         width: 100%;
-        background-color: transparentize(steelblue, 0.3);
+        background-color: theme("colors.brand.600 / 70%");
         text-align: center;
         display: flex;
         align-items: center;
@@ -1423,17 +1566,17 @@ line.tick {
 }
 
 #myGrid .parameter-column {
-    background-color: #f1f7ff;
+    background-color: $primaryLight;
 }
 
 #myGrid .slick-row:hover .parameter-column {
-    background-color: #e6ebff;
+    background-color: $primaryColor;
 }
 
 /* For multiple attribute value columns, copy link hover color to siblings. */
 #myGrid .slick-row:has(.parameter-column:hover) .parameter-column {
     .link {
-        color: indianred !important;
+        color: theme("colors.brand.800") !important;
     }
 }
 
@@ -1492,7 +1635,7 @@ line.tick {
             &.active {
                 border-bottom-color: transparent;
                 a {
-                    @apply text-indigo-500 font-bold;
+                    @apply text-brand-700 font-bold;
                 }
             }
             .badge {
@@ -1535,16 +1678,16 @@ line.tick {
         display: block;
         cursor: pointer;
         position: relative;
-        border: 1px solid rgba($primaryColor, 0);
+        border: 1px solid transparent;
         transition: all 200ms ease;
         white-space: nowrap;
         &:hover {
-            color: navy;
-            border: 1px solid rgba(darken($primaryColor, 10%), 1);
+            color: theme("colors.brand.800");
+            border: 1px solid theme("colors.brand.200");
         }
     }
     .column_1 ul {
-        background-color: lighten($primaryColor, 4%);
+        background-color: $primaryLight;
         border: 1px solid $primaryColor;
         .background {
             background-color: $primaryColor;
@@ -1587,10 +1730,10 @@ line.tick {
             color: black;
         }
         a {
-            color: rgb(67 56 202 / var(--tw-text-opacity));
+            color: theme("colors.brand.400");
         }
         a:hover {
-            color: indianred;
+            color: theme("colors.brand.800");
         }
     }
 
@@ -1630,8 +1773,8 @@ line.tick {
     border-color: #f1e7bc;
 }
 .bs-callout-info {
-    background-color: #f0f7fd;
-    border-color: #d0e3f0;
+    background-color: $primaryLight;
+    border-color: theme("colors.brand.200");
 }
 
 .dropdown-menu {
@@ -1646,10 +1789,10 @@ line.tick {
             color: black;
         }
         a {
-            color: rgb(67 56 202 / var(--tw-text-opacity));
+            color: theme("colors.brand.400");
         }
         a:hover {
-            color: indianred;
+            color: theme("colors.brand.800");
         }
     }
 }
@@ -1688,7 +1831,7 @@ line.tick {
     min-width: 100%;
     max-height: 400px;
     .selected {
-        background: rgb(242, 247, 255);
+        background: $primaryLight;
     }
     .attribute {
         display: flex;
@@ -1792,7 +1935,7 @@ line.tick {
             color: white;
         }
         .selected {
-            background: #f2f7ff;
+            background: $primaryLight;
             .checked {
                 color: black;
             }
@@ -1852,6 +1995,11 @@ line.tick {
     justify-content: center;
     align-items: center;
     height: 100vh;
+
+    > img {
+        max-width: calc(100% - 32px);
+        height: auto;
+    }
 }
 
 .maintenance-news {

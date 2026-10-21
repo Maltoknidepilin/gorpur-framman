@@ -95,14 +95,18 @@ export function addImgHash(htmlStr: string): string {
 }
 
 /** Show a basic modal with vanilla JS */
-export function simpleModal(html: string) {
+export function simpleModal(html: string, buttonLabel = "OK") {
     const dialog = document.createElement("dialog")
     dialog.classList.add("bg-white", "p-4", "rounded-lg", "shadow-lg", "border")
-    const button = '<button class="block mx-auto btn btn-primary mt-4">OK</button>'
-    dialog.innerHTML = html + button
+    dialog.innerHTML = html
+    const button = document.createElement("button")
+    button.className = "block mx-auto btn btn-primary mt-4"
+    button.textContent = buttonLabel
+    button.addEventListener("click", () => dialog.close())
+    dialog.appendChild(button)
     document.body.appendChild(dialog)
     dialog.showModal()
-    dialog.querySelector("button")!.addEventListener("click", () => dialog.close())
+    dialog.addEventListener("close", () => dialog.remove(), { once: true })
 }
 
 /** Split a string by the first occurence of a given separator */
@@ -113,7 +117,7 @@ export const splitFirst = (sep: string, s: string): [string, string] => {
 }
 
 /** Escape special characters in a string so it can be safely inserted in a regular expression. */
-export const regescape = (s: string): string => s.replace(/[.|?|+|*||'|()^$\\]/g, "\\$&").replace(/"/g, '""')
+export const regescape = (s: string): string => s.replace(/[.\[\]?+*|'()^$\\]/g, "\\$&").replace(/"/g, '""')
 
 /** Unescape special characters in a regular expression – remove single backslashes and replace double with single. */
 export const unregescape = (s: string): string => s.replace(/\\\\|\\/g, (match) => (match === "\\\\" ? "\\" : ""))

@@ -38,7 +38,7 @@ export const loginBoxComponent: IComponentOptions = {
                     >{{'save_login' | loc:$root.lang}}</label
                 >
                 <p ng-show="$ctrl.loginErr" class="err_msg">{{'login_fail_msg' | loc:$root.lang}}</p>
-                <input class="btn btn-sm bg-blue-500 text-white" type="submit" value="{{'send' | loc:$root.lang}}" />
+                <input class="btn btn-sm bg-brand-600 hover:bg-brand-700 text-white" type="submit" value="{{'send' | loc:$root.lang}}" />
                 <div ng-if="$ctrl.loading" style="float: right; margin-top: 11px; margin-right: 9px;">
                     <i class="fa-solid fa-spinner fa-pulse w-fit"></i>
                 </div>

@@ -32,6 +32,8 @@ export class TrendGraph {
             element: $(".chart", el).empty().get(0),
             renderer: "line",
             interpolation: "linear",
+            // The preview and bar renderer must not leave stacking offsets in the line data.
+            preserve: true,
             series,
             padding: {
                 top: 0.1,
@@ -159,7 +161,7 @@ export class TrendGraph {
     ) {
         const createTotalSeries = (stats: GraphStats) => ({
             data: getSeriesData(stats.relative, zoom),
-            color: "steelblue",
+            color: "#586d69",
             name: "Σ",
             cqp,
             abs_data: getSeriesData(stats.absolute, zoom),

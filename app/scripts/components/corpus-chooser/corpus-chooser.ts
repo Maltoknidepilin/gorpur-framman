@@ -1,4 +1,4 @@
-import angular, { IController } from "angular"
+import angular, { IController, IAugmentedJQuery, IScope, ITimeoutService, IWindowService } from "angular"
 import { isEqual, omitBy, pickBy } from "lodash"
 import statemachine from "@/statemachine"
 import settings from "@/settings"
@@ -31,6 +31,10 @@ type CorpusChooserController = IController & {
     showChooser: boolean
     showTimeGraph: boolean
     showInfoBox: boolean
+    compactInfo: boolean
+    chooserStyle: { maxWidth: string; maxHeight: string }
+    closeInfo: () => void
+    onInfoKeydown: (event: KeyboardEvent) => void
     selectedNumberOfTokens: number
     selectedNumberOfSentences: number
     infoNode?: ChooserFolderSub | CorpusTransformed
@@ -61,9 +65,9 @@ angular.module("korpApp").component("corpusChooser", {
         <div class="scroll_checkboxes shrink-0 cursor-pointer">
             <div
                 ng-click="$ctrl.onShowChooser()"
-                class="hp_topframe no-underline flex justify-between items-center border border-gray-400 transition-all duration-500 hover:bg-blue-50 rounded h-12"
+                class="hp_topframe no-underline flex justify-between items-center border border-gray-400 transition-all duration-500 hover:bg-brand-50 rounded min-h-12"
             >
-                <div>
+                <div class="min-w-0">
                     <span ng-if-start="$ctrl.selectCount != 1">{{ $ctrl.selectCount }}</span>
                     <span>{{ 'corpselector_of' | loc:$root.lang }}</span>
                     <span>{{ $ctrl.totalCount }}</span>
@@ -80,15 +84,18 @@ angular.module("korpApp").component("corpusChooser", {
                         'corpselector_tokens' | loc:$root.lang }}
                     </span>
                 </div>
-                <div class="transition-colors duration-500">
+                <div class="shrink-0 ml-3 transition-colors duration-500">
                     <i class="fa-solid fa-caret-up relative top-2"></i>
                     <br />
                     <i class="fa-solid fa-caret-down relative bottom-2"></i>
                 </div>
             </div>
-            <div ng-if="$ctrl.showChooser" class="corpus-chooser flex bg-white">
-                <div class="popupchecks shrink-0 p-4 h-full">
-                    <div class="flex">
+            <div ng-if="$ctrl.showChooser" class="corpus-chooser flex bg-white" ng-style="$ctrl.chooserStyle">
+                <div
+                    class="popupchecks shrink-0 p-4 h-full"
+                    ng-attr-inert="{{ $ctrl.compactInfo && $ctrl.showInfoBox ? '' : undefined }}"
+                >
+                    <div class="corpus-chooser-actions flex">
                         <corpus-time-graph ng-if="$ctrl.showTimeGraph"></corpus-time-graph>
                         <div class="p-2 flex flex-wrap gap-2 items-stretch">
                             <button ng-click="$ctrl.selectAll()" class="btn btn-default btn-sm w-40 shrink">
@@ -114,20 +121,101 @@ angular.module("korpApp").component("corpusChooser", {
                         loc:$root.lang}}
                     </p>
                 </div>
-                <cc-info-box
+                <div
                     ng-if="$ctrl.showInfoBox"
-                    class="sticky top-0 bg-gray-100 overflow-auto"
-                    style="width: 480px;"
-                    object="$ctrl.infoNode"
-                ></cc-info-box>
+                    class="corpus-info"
+                    ng-class="{ 'corpus-info-overlay': $ctrl.compactInfo }"
+                    ng-click="$ctrl.compactInfo && $event.target === $event.currentTarget && $ctrl.closeInfo()"
+                    ng-keydown="$ctrl.onInfoKeydown($event)"
+                >
+                    <div
+                        class="corpus-info-panel bg-gray-100"
+                        ng-attr-role="{{ $ctrl.compactInfo ? 'dialog' : undefined }}"
+                        ng-attr-aria-modal="{{ $ctrl.compactInfo ? 'true' : undefined }}"
+                        aria-label="{{ $ctrl.infoNode.title | locObj:$root.lang }}"
+                    >
+                        <div class="corpus-info-toolbar bg-gray-100">
+                            <button type="button" class="btn btn-default btn-sm" ng-click="$ctrl.closeInfo()">
+                                <i class="fa-solid fa-times" aria-hidden="true"></i>
+                                {{ 'modal_close' | loc:$root.lang }}
+                            </button>
+                        </div>
+                        <cc-info-box object="$ctrl.infoNode"></cc-info-box>
+                    </div>
+                </div>
             </div>
         </div>
     `,
     bindings: {},
     controller: [
         "store",
-        function (store: StoreService) {
+        "$element",
+        "$scope",
+        "$window",
+        "$timeout",
+        function (
+            store: StoreService,
+            $element: IAugmentedJQuery,
+            $scope: IScope,
+            $window: IWindowService,
+            $timeout: ITimeoutService,
+        ) {
             const $ctrl = this as CorpusChooserController
+            let previousFocus: HTMLElement | null = null
+            let resizeObserver: ResizeObserver | undefined
+
+            // Include the chooser's offset: two columns may not fit even on a wide screen.
+            function updateLayout() {
+                const frame = $element[0].querySelector(".hp_topframe")
+                if (!frame) return
+                const bounds = frame.getBoundingClientRect()
+                const availableWidth = $window.document.documentElement.clientWidth - bounds.left - 16
+                $ctrl.compactInfo = availableWidth < 962
+                $ctrl.chooserStyle = {
+                    maxWidth: `${Math.max(0, availableWidth)}px`,
+                    maxHeight: `${Math.max(0, $window.innerHeight - bounds.bottom - 16)}px`,
+                }
+            }
+
+            const onResize = () => $scope.$evalAsync(updateLayout)
+            $ctrl.$postLink = () => {
+                updateLayout()
+                $window.addEventListener("resize", onResize)
+                resizeObserver = new ResizeObserver(onResize)
+                resizeObserver.observe($element[0])
+            }
+            $ctrl.$onDestroy = () => {
+                $window.removeEventListener("resize", onResize)
+                resizeObserver?.disconnect()
+            }
+
+            $ctrl.closeInfo = () => {
+                $ctrl.showInfoBox = false
+                $ctrl.infoNode = undefined
+                $timeout(() => previousFocus?.focus())
+            }
+
+            $ctrl.onInfoKeydown = (event) => {
+                if (event.key === "Escape") {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    $ctrl.closeInfo()
+                } else if (event.key === "Tab" && $ctrl.compactInfo) {
+                    const panel = $element[0].querySelector(".corpus-info-panel")!
+                    const controls = Array.from(
+                        panel.querySelectorAll<HTMLElement>("a[href], button, input, select, textarea, [tabindex]"),
+                    ).filter((control) => control.tabIndex >= 0 && control.getClientRects().length > 0)
+                    const first = controls[0]
+                    const last = controls[controls.length - 1]
+                    if (event.shiftKey && event.target === first) {
+                        event.preventDefault()
+                        last?.focus()
+                    } else if (!event.shiftKey && event.target === last) {
+                        event.preventDefault()
+                        first?.focus()
+                    }
+                }
+            }
 
             $ctrl.showChooser = false
 
@@ -165,6 +253,7 @@ angular.module("korpApp").component("corpusChooser", {
             })
 
             $ctrl.onShowChooser = () => {
+                updateLayout()
                 $ctrl.showChooser = !$ctrl.showChooser
             }
 
@@ -236,8 +325,13 @@ angular.module("korpApp").component("corpusChooser", {
             }
 
             $ctrl.onShowInfo = (node: ChooserFolderSub | CorpusTransformed) => {
+                updateLayout()
                 $ctrl.showInfoBox = node.id != $ctrl.infoNode?.id
                 $ctrl.infoNode = $ctrl.showInfoBox ? node : undefined
+                if ($ctrl.showInfoBox) {
+                    previousFocus = $window.document.activeElement as HTMLElement | null
+                    $timeout(() => $element[0].querySelector<HTMLButtonElement>(".corpus-info-toolbar button")?.focus())
+                }
             }
         },
     ],

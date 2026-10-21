@@ -20,7 +20,7 @@ export class CorpusTimeChart {
             {
                 label: loc("corpselector_selected", lang),
                 data: {},
-                backgroundColor: "navy",
+                backgroundColor: "#586d69",
             },
             {
                 label: loc("corpselector_all", lang),

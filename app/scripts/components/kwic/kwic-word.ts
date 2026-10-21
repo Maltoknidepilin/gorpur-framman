@@ -1,11 +1,14 @@
 import angular, { IController, IScope } from "angular"
 import { html } from "@/util"
 import { ApiKwic, Token } from "@/backend/types"
+import { tokenWhitespace } from "@/kwic/whitespace"
 
 type KwicWordController = IController & {
     word: Token
     sentence: ApiKwic
     sentenceIndex: number
+    head: string
+    tail: string
 }
 
 export type KwicWordScope = IScope & {
@@ -16,7 +19,7 @@ export type KwicWordScope = IScope & {
 }
 
 angular.module("korpApp").component("kwicWord", {
-    template: html`<span class="word" ng-class="class">{{::$ctrl.word.word}}</span> `,
+    template: html`{{::$ctrl.head}}<span class="word" ng-class="class">{{::$ctrl.word.word}}</span>{{::$ctrl.tail}}`,
     bindings: {
         word: "<",
         sentence: "<",
@@ -39,10 +42,13 @@ angular.module("korpApp").component("kwicWord", {
             $scope.$watch(
                 "word",
                 (word: Token) => {
+                    const spacing = tokenWhitespace(word)
+                    $ctrl.head = spacing.head
+                    $ctrl.tail = spacing.tail
                     // Produce applicable class names depending on token data.
                     $scope.class = {
                         reading_match: word._match,
-                        punct: word._punct,
+                        punct: word._punct && !spacing.fromSource,
                         match_sentence: word._matchSentence,
                         link_selected: word._link_selected,
                         open_sentence: "_open_sentence" in word,

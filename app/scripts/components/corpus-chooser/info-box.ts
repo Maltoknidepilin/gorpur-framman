@@ -11,6 +11,8 @@ import {
     makeLink,
 } from "@/corpora/corpus-chooser"
 import { StoreService } from "@/services/store"
+import { corpusDownloadInfo, folderDownloadInfo } from "@/corpora/download-info"
+import { sourceCitations, SourceCitation } from "@/corpora/source-citations"
 
 type CcInfoBoxController = IController & {
     object: ChooserFolderSub | CorpusTransformed
@@ -18,27 +20,49 @@ type CcInfoBoxController = IController & {
     isFolder: boolean
     title: LangString
     description?: LangString
+    sourceCitations?: SourceCitation[]
+    timelineNote?: LangString
     license?: LangString
     link?: CorpusLinkInfo
     numberOfChildren: number
     langStats: CorpusSizeInfo[]
-    context: boolean
     limitedAccess: boolean
     lastUpdated?: string
+    downloadRestricted: boolean
+    downloadMixed: boolean
+    downloadUrl?: string
 }
 
 angular.module("korpApp").component("ccInfoBox", {
     template: html`
         <div class="p-5 m-8 bg-white">
             <h3 class="mt-0 mb-6">
-                <i class="fa-solid fa-file-text-o text-blue-700" ng-if="$ctrl.isCorpus"></i>
-                <i class="fa-solid fa-folder-open-o text-blue-700" ng-if="$ctrl.isFolder"></i>
+                <i class="fa-solid fa-file-text-o text-brand-700" ng-if="$ctrl.isCorpus"></i>
+                <i class="fa-solid fa-folder-open-o text-brand-700" ng-if="$ctrl.isFolder"></i>
                 {{ $ctrl.title | locObj:$root.lang }}
             </h3>
-            <div class="text-base my-3" ng-bind-html="$ctrl.description | locObj:$root.lang | trust"></div>
+            <div class="text-base my-3 [&_ul]:list-disc [&_ul]:pl-5" ng-bind-html="$ctrl.description | locObj:$root.lang | trust"></div>
+            <p class="text-sm my-3" ng-if="$ctrl.timelineNote">{{ $ctrl.timelineNote | locObj:$root.lang }}</p>
+            <details class="text-base my-3" ng-if="$ctrl.sourceCitations.length">
+                <summary>{{'about_sources_header' | loc:$root.lang}}</summary>
+                <ul class="list-disc pl-5 space-y-2 mt-2">
+                    <li ng-repeat="reference in $ctrl.sourceCitations track by reference.url">
+                        <a ng-href="{{reference.url}}" target="_blank" rel="noopener noreferrer">{{reference.text}}</a>
+                    </li>
+                </ul>
+            </details>
             <div class="text-base my-3" ng-if="$ctrl.license">
                 <strong>{{'corpselector_license' | loc:$root.lang}}:</strong>
                 <span ng-bind-html="$ctrl.license | locObj:$root.lang | trust"></span>
+            </div>
+            <div class="text-base my-3">
+                <strong>{{'corpselector_download' | loc:$root.lang}}:</strong>
+                <span ng-if="$ctrl.downloadRestricted">{{'corpselector_download_restricted' | loc:$root.lang}}</span>
+                <span ng-if="$ctrl.downloadMixed">{{'corpselector_download_mixed' | loc:$root.lang}}</span>
+                <a ng-if="$ctrl.downloadUrl" ng-href="{{$ctrl.downloadUrl}}" target="_blank"
+                    rel="noopener noreferrer" aria-label="{{'corpselector_download_accessible' | loc:$root.lang}}: {{$ctrl.title | locObj:$root.lang}}">
+                    {{'corpselector_download_link' | loc:$root.lang}}
+                </a>
             </div>
             <div ng-if="$ctrl.link" class="my-3">
                 <a ng-href="{{$ctrl.link.url}}" target="_blank">
@@ -46,7 +70,7 @@ angular.module("korpApp").component("ccInfoBox", {
                     <i class="fa-solid fa-up-right-from-square fa-sm mx-1"></i>
                 </a>
             </div>
-            <ul class="border-l-4 border-blue-500 pl-3 leading-none space-y-1">
+            <ul class="border-l-4 border-brand-500 pl-3 leading-none space-y-1">
                 <li ng-if="$ctrl.isFolder">
                     <strong>{{$ctrl.numberOfChildren}}</strong>
                     {{$ctrl.numberOfChildren == 1 ? 'corpselector_corporawith_sing' : 'corpselector_corporawith_plur' |
@@ -63,7 +87,6 @@ angular.module("korpApp").component("ccInfoBox", {
                     <span ng-if="$ctrl.langStats.length > 1">({{ stats.lang | loc:$root.lang }})</span>
                 </li>
             </ul>
-            <div ng-if="$ctrl.context">{{'corpselector_supports' | loc:$root.lang}}</div>
             <div ng-if="$ctrl.limitedAccess">{{'corpselector_limited' | loc:$root.lang}}</div>
             <div class="text-sm mt-3" ng-if="$ctrl.isCorpus">
                 <span class="mr-1">{{'corpselector_lastupdate' | loc:$root.lang}}:</span>
@@ -89,12 +112,20 @@ angular.module("korpApp").component("ccInfoBox", {
                 if (isFolder($ctrl.object)) $ctrl.numberOfChildren = $ctrl.object.numberOfChildren
 
                 $ctrl.limitedAccess = false
-                $ctrl.context = false
                 $ctrl.link = undefined
+                $ctrl.timelineNote = undefined
+                $ctrl.sourceCitations = undefined
+                const download = isFolder($ctrl.object)
+                    ? folderDownloadInfo($ctrl.object)
+                    : corpusDownloadInfo($ctrl.object)
+                $ctrl.downloadRestricted = download.restricted
+                $ctrl.downloadMixed = download.mixed
+                $ctrl.downloadUrl = download.url
 
                 if (!isFolder($ctrl.object)) {
+                    $ctrl.sourceCitations = sourceCitations([$ctrl.object])
+                    $ctrl.timelineNote = $ctrl.object.timeline_estimate?.note
                     $ctrl.limitedAccess = $ctrl.object["limited_access"] || false
-                    $ctrl.context = Object.keys($ctrl.object.context).length > 1
                     $ctrl.langStats = getSizeInfo($ctrl.object)
                     $ctrl.lastUpdated = $ctrl.object.info.Updated
                     $ctrl.link = makeLink($ctrl.object.id, store.lang)

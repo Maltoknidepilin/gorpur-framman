@@ -35,6 +35,7 @@ export type Corpus = {
     context: Labeled[]
     deptree?: DeptreeConfig
     description: LangString
+    source_citations?: import("@/corpora/source-citations").SourceCitation[]
     hide?: boolean
     id: string
     /** Must be present in parallel corpus */
@@ -42,6 +43,15 @@ export type Corpus = {
     license?: LangString
     /** Permission to download search results, derived from structured corpus rights. */
     download_allowed?: boolean
+    /** Existing TEI availability; full corpus publication requires `free`. */
+    availability_status?: string
+    /** Planned Hugging Face corpus folder; available before the archive is uploaded. */
+    download_url?: string
+    /** Selector-only annual estimate. These weights do not assign dates to texts. */
+    timeline_estimate?: {
+        weights: Record<string, number>
+        note?: LangString
+    }
     limited_access?: boolean
     linked_to?: string[]
     pivot?: boolean
@@ -100,6 +110,10 @@ export type Attribute = {
     sidebar_component?: MaybeWithOptions
     sidebar_hide_values?: string[]
     sidebar_hide_when?: Record<string, string | string[]>
+    /** Show grouped provenance in place of this entry-specific scalar row. */
+    sidebar_hide_if_present?: string
+    /** Omit this row when its visible values match another metadata field. */
+    sidebar_hide_if_equal_to?: string
     sidebar_value_map?: Record<string, Record<string, string>>
     sidebar_info_url?: string
     sidebar_hide_label?: boolean

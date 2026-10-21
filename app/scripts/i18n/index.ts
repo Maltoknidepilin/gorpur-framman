@@ -4,6 +4,18 @@ import { getUrlHash } from "@/urlparams"
 import { getService } from "@/angular-util"
 import type { LangLocMap, LangString, LocLangMap, LocMap } from "@/i18n/types"
 import { Attribute } from "@/settings/config.types"
+import localeFao from "../../translations/locale-fao.json"
+import localeEng from "../../translations/locale-eng.json"
+import localeSwe from "../../translations/locale-swe.json"
+
+// The startup error dialog can open before translation requests have finished.
+// Read these two fallback strings from the same translation files as the UI.
+const startupLoc: LangLocMap = Object.fromEntries(
+    Object.entries({ fao: localeFao, eng: localeEng, swe: localeSwe }).map(([lang, data]) => [
+        lang,
+        { fail_network: data.fail_network, modal_ok: data.modal_ok },
+    ]),
+)
 
 let locData: LangLocMap | undefined
 
@@ -29,8 +41,8 @@ export function getLang(): string {
  */
 export function loc(key: string, lang?: string) {
     lang = lang || getLang()
-    const out = locData?.[lang][key]
-    return out ?? key
+    const out = locData?.[lang]?.[key]
+    return out ?? startupLoc[lang]?.[key] ?? key
 }
 
 /**

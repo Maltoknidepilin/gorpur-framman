@@ -6,7 +6,7 @@ export type CountTimeParams = {
     corpus: string
     cqp: string
     default_within?: string
-    with?: string
+    within?: string
     [subcqpn: `subcqp${string}`]: string
     granularity?: Granularity
     from?: NumericString
