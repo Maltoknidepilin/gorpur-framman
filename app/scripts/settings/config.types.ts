@@ -35,7 +35,6 @@ export type Corpus = {
     context: Labeled[]
     deptree?: DeptreeConfig
     description: LangString
-    source_citations?: import("@/corpora/source-citations").SourceCitation[]
     hide?: boolean
     id: string
     /** Must be present in parallel corpus */

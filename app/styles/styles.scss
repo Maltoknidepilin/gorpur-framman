@@ -17,6 +17,7 @@ input[type="radio"] {
 
 $primaryColor: theme("colors.brand.100");
 $primaryLight: theme("colors.brand.50");
+$linkColor: #426c62;
 
 $color_yellow: #fff3d8;
 
@@ -76,13 +77,20 @@ ol {
 a {
     cursor: pointer;
     text-decoration: none;
-    @apply text-brand-400;
+    color: $linkColor;
     &:visited {
-        color: theme("colors.brand.400");
+        color: $linkColor;
     }
     &:hover {
         color: theme("colors.brand.800");
     }
+}
+
+// Keep links identifiable within prose without underlining navigation or buttons.
+:where([ng-bind-html], cc-info-box, #about_body, sidebar) a[href]:not(.btn):not([role="button"]) {
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.15em;
 }
 
 a.btn {
@@ -116,7 +124,7 @@ img {
 
 /* Qualify with "body" to override .slick-cell pointer style */
 body .link {
-    @apply text-brand-400;
+    color: $linkColor;
     cursor: pointer;
     &:hover {
         color: theme("colors.brand.800") !important;
@@ -970,7 +978,7 @@ span.absStat {
     margin-right: 10px;
     padding-left: 0;
     a:visited {
-        color: theme("colors.brand.400");
+        color: $linkColor;
     }
     a:hover {
         color: theme("colors.brand.800");
@@ -1730,7 +1738,7 @@ line.tick {
             color: black;
         }
         a {
-            color: theme("colors.brand.400");
+            color: $linkColor;
         }
         a:hover {
             color: theme("colors.brand.800");
@@ -1789,7 +1797,7 @@ line.tick {
             color: black;
         }
         a {
-            color: theme("colors.brand.400");
+            color: $linkColor;
         }
         a:hover {
             color: theme("colors.brand.800");

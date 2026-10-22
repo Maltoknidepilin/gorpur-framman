@@ -116,19 +116,23 @@ export class CorpusSet {
 
         // Merge datasets from attributes with the same name across all corpora
         for (const name in rest) {
+            const publicDefinitions = attrs.map((attributes) => attributes[name])
+                .filter((attribute) => attribute && attribute.display_type !== "hidden")
+            const searchableDefinitions = publicDefinitions.filter((attribute) => !attribute.hide_extended)
+            const definitions = searchableDefinitions.length ? searchableDefinitions : publicDefinitions
             // A corpus-specific selector must not turn a mixed selection into
             // a dropdown containing every other corpus's free-text values.
             const component = rest[name].extended_component
             const componentName = typeof component === "string" ? component : component?.name
             if (
                 componentName === "structServiceSelect" &&
-                attrs.some((attributes) => attributes[name] && !isEqual(attributes[name].extended_component, component))
+                definitions.some((attribute) => !isEqual(attribute.extended_component, component))
             ) {
                 delete rest[name].extended_component
             }
             if (rest[name].dataset) {
-                const sameNameDatasets = attrs
-                    .map((attrs2) => attrs2[name]?.dataset)
+                const sameNameDatasets = definitions
+                    .map((attribute) => attribute.dataset)
                     .filter(Boolean)
                     .map((d) => normalizeDataset(d!))
                 rest[name].dataset = Object.assign(normalizeDataset(rest[name].dataset!), ...sameNameDatasets)
@@ -167,10 +171,20 @@ export class CorpusSet {
         const intersection = objectIntersection(attrs)
 
         // Mark attributes as disabled if not common to all attribute sets.
-        Object.entries(union).forEach(([key, value]) => {
+        Object.keys(union).forEach((key) => {
+            // Internal metadata in one corpus must not override the public
+            // definition (including its widget and operators) in another.
+            const publicDefinitions = attrs.map((attributes) => attributes[key])
+                .filter((attribute) => attribute && attribute.display_type !== "hidden")
+            // A sidebar-only definition must not relabel or replace a search
+            // field from another corpus (e.g. ISLEX and FOB headwords).
+            const searchableDefinitions = publicDefinitions.filter((attribute) => !attribute.hide_extended)
+            const preferred = searchableDefinitions.length ? searchableDefinitions : publicDefinitions
+            if (preferred.length) union[key] = objectUnion(preferred)
+            const value = union[key]
             // A corpus may hide its own field without hiding it in other
             // selected corpora. Ignore corpora which do not define the field.
-            if (attrs.some((attributes) => attributes[key] && !attributes[key].hide_extended)) {
+            if (publicDefinitions.some((attribute) => !attribute.hide_extended)) {
                 delete value.hide_extended
             }
             if (!intersection[key]) value["disabled"] = true

@@ -12,6 +12,8 @@
 
     <div ng-bind-html="'about_cite' | loc:lang | trust"></div>
 
+    <div class="pt-4" ng-bind-html="'about_download' | loc:lang | trust"></div>
+
     <h4 ng-bind-html="'about_korp_header' | loc:lang | trust"></h4>
     <div ng-bind-html="'about_korp' | loc:lang | trust"></div>
 
@@ -24,7 +26,9 @@
 
     <h4>{{'about_dev' | loc:lang}}</h4>
     <ul>
-        <li>Uni Johannesen</li>
+        <li>
+            <a target="_blank" href="https://www.pure.fo/en/persons/uni-johannesen/">Uni Johannesen</a>
+        </li>
         <li>Ingmar Berg</li>
     </ul>
 

@@ -136,20 +136,14 @@ export function stringify(cqp_obj: CqpQuery, expanded_format?: boolean): string 
                         out = parseDateInterval(op, val as DateRange, expanded_format)
                     } else {
                         out = `${type} ${op} "${val}"`
-                        // A structural field may be a scalar in one selected
-                        // corpus and a set in another. Native "contains" only
-                        // matches delimited sets, so include scalar equality.
+                        // Structural metadata can contain legacy scalar values
+                        // even when its shared preset declares a set. Native
+                        // "contains" only matches delimited sets, so support
+                        // singleton values as well, including partial matches.
                         if (expanded_format && type.startsWith("_.") && ["contains", "not contains"].includes(op)) {
-                            const name = type.slice(2)
-                            const attrs = corpusSelection.corpora?.flatMap(corpus => {
-                                const attr = corpus.struct_attributes?.[name]
-                                return attr ? [attr] : []
-                            }) || []
-                            if (attrs.some(attr => attr.type === "set") && attrs.some(attr => attr.type !== "set")) {
-                                const negative = op === "not contains"
-                                out = `(${type} ${op} "${val}"${flagstr} ${negative ? "&" : "|"} ${type} ${negative ? "!=" : "="} "${val}"${flagstr})`
-                                flagstr = ""
-                            }
+                            const negative = op === "not contains"
+                            out = `(${type} ${op} "${val}"${flagstr} ${negative ? "&" : "|"} ${type} ${negative ? "!=" : "="} "${val}"${flagstr})`
+                            flagstr = ""
                         }
                     }
                 }

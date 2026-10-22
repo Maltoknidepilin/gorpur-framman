@@ -337,6 +337,19 @@ korpApp.run([
 ])
 
 korpApp.filter("trust", ["$sce", ($sce) => (input: string) => $sce.trustAsHtml(input)])
+korpApp.filter("linksInNewTab", () => (input?: string) => {
+    if (!input) return input
+    const template = document.createElement("template")
+    template.innerHTML = input
+    template.content.querySelectorAll("a[href]").forEach((link) => {
+        link.setAttribute("target", "_blank")
+        const rel = new Set((link.getAttribute("rel") || "").split(/\s+/).filter(Boolean))
+        rel.add("noopener")
+        rel.add("noreferrer")
+        link.setAttribute("rel", [...rel].join(" "))
+    })
+    return template.innerHTML
+})
 // Passing `lang` seems to be necessary to have the string updated when switching language.
 // Can fall back on using store for numbers that will anyway be re-rendered when switching language.
 korpApp.filter("prettyNumber", [

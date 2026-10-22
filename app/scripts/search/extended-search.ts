@@ -11,7 +11,12 @@ export async function loadOptions(attr: AttributeOption, lang: string): Promise<
 
     // check which corpora support attributes
     const corpora = corpusSelection.corpora
-        .filter((corpus) => name in corpus.struct_attributes || name in corpus.attributes)
+        .filter((corpus) => {
+            const definition = corpus.struct_attributes[name] || corpus.attributes[name]
+            // Ignore internal/sidebar-only meanings of a shared attribute.
+            // Fróðskapur's category must not become a Tingfundir party option.
+            return definition && definition.display_type !== "hidden" && !definition.hide_extended
+        })
         .map((corpus) => corpus.id)
 
     if (!corpora.length) return []

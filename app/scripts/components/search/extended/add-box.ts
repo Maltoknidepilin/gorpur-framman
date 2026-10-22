@@ -28,7 +28,7 @@ angular.module("korpApp").component("addBox", {
                     class="btn btn-sm image_button insert_token border-gray-300 transition duration-200 hover:bg-gray-200"
                     ng-click="$ctrl.showSelectButtons()"
                 >
-                    <i class="fa-solid fa-lg fa-plus-circle text-orange-900 mr-1"></i>
+                    <i class="fa-solid fa-lg fa-plus-circle text-brand-600 mr-1"></i>
                     {{ 'add_tag_box' | loc:$root.lang }}
                 </button>
                 <div class="pos-buttons" ng-class="{'fade-in': $ctrl.showStuffSelectButtons}">

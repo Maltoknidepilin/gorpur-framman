@@ -95,7 +95,8 @@ angular.module("korpApp").component("extendedCqpTerm", {
             /** Update list of available attributes */
             async function updateAttributes() {
                 // TODO: respect the setting 'wordAttributeSelector' and similar
-                if (!corpusSelection.corpora.length) return
+                // An empty selection must also clear metadata choices left
+                // over from the previous corpus selection.
 
                 // The date interval attribute is not available until time data is ready
                 if (ctrl.term.type == "date_interval") await getTimeData()

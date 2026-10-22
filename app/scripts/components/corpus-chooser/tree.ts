@@ -67,9 +67,9 @@ angular.module("korpApp").component("ccTree", {
             </div>
             <div
                 ng-repeat="corpus in $ctrl.sortedCorpora"
-                class="boxdiv flex"
+                class="boxdiv flex bg-brand-100"
                 ng-class="{ 'disabled cursor-default': !corpus.userHasAccess, 'cursor-pointer': corpus.userHasAccess }"
-                style="margin-left:16px; background-color: rgb(221, 233, 255); margin-bottom: 2px; padding-top: 1px; padding-bottom: 1px;"
+                style="margin-left:16px; margin-bottom: 2px; padding-top: 1px; padding-bottom: 1px;"
                 ng-click="$ctrl.toggleCorpusSelection($event, corpus)"
             >
                 <input ng-if="corpus.userHasAccess" type="checkbox" ng-checked="corpus.selected" class="mx-1" />
