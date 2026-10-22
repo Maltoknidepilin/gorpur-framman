@@ -107,7 +107,7 @@
 
     "case_insensitive": "eingin munur á stórum/smáum stavum",
     "case_sensitive": "ger mun á stórum og smáum stavum",
-    "reduce_text": "Sammanställ på",
+    "reduce_text": "Bólka eftir",
     "word_pic_bad_search": "Ordbild kräver att sökfrågan innehåller exakt ett ord eller lemgram.",
     "word_pic_global_filter": "Ordbild kan inte kombineras med filter. Töm filter för att fortsätta.",
     "word_pic_pos_not_supported": "Ordbilden stödjer inte sökordets ordklass.",
