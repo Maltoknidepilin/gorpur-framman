@@ -7,11 +7,14 @@ const { BundleAnalyzerPlugin } = require("webpack-bundle-analyzer")
 module.exports = merge(common, {
     plugins: [
         new CompressionPlugin({}),
-        new BundleAnalyzerPlugin({
-            // creates a report.html in the dist folder.
-            analyzerMode: "static",
-            openAnalyzer: false,
-        }),
+        ...(process.env.ANALYZE_BUNDLE === "true"
+            ? [
+                  new BundleAnalyzerPlugin({
+                      analyzerMode: "static",
+                      openAnalyzer: false,
+                  }),
+              ]
+            : []),
     ],
     optimization: {
         minimizer: [

@@ -1473,7 +1473,13 @@ slider {
     }
 }
 .graph_tab {
-    min-height: 430px;
+    padding-bottom: 8px;
+}
+
+// Let the page scroll naturally when the timeline is the active result.
+#left-column:has(.tab-pane.active results-trend-diagram) {
+    min-width: 0;
+    overflow: visible;
 }
 
 .rickshaw_graph {

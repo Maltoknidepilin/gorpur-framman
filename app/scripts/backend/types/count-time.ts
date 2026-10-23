@@ -12,6 +12,8 @@ export type CountTimeParams = {
     from?: NumericString
     to?: NumericString
     strategy?: 1 | 2 | 3
+    /** Precision-aware counting, or allocation across the original date interval. */
+    date_mode?: "strict" | "spread"
     per_corpus?: boolean
     combined?: boolean
     [cqpn: `cqp${number}`]: string
@@ -22,12 +24,23 @@ export type CountTimeParams = {
 export type CountTimeResponse = {
     corpora: Record<string, GraphStats | (GraphStats | GraphStatsCqp)[]>
     combined: GraphStats | (GraphStats | GraphStatsCqp)[]
+    time_info?: {
+        date_mode: "strict" | "spread"
+        estimated_corpora: string[]
+        excluded_corpora: string[]
+        imprecise_tokens: number
+        undated_tokens: number
+        finest_granularity?: Granularity | null
+    }
 }
 
 export type GraphStats = {
     absolute: Histogram
     relative: Histogram
     sums: AbsRelTuple
+    tokens?: Histogram
+    estimated_absolute?: Histogram
+    estimated_tokens?: Histogram
 }
 
 /** Stats contains subquery if graph was created with multiple rows selected in the stats table. */

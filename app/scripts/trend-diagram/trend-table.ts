@@ -1,6 +1,5 @@
 import moment from "moment"
-import { FORMATS, Series } from "./util"
-import { formatFrequency } from "@/i18n/util"
+import { FORMATS, Series, formatTrendCount } from "./util"
 import { escape, sortedIndexOf } from "lodash"
 import { AbsRelSeq } from "@/statistics/statistics.types"
 import { StoreService } from "@/services/store"
@@ -24,7 +23,8 @@ export function renderTable(store: StoreService, el: HTMLElement, series: Series
                 name: timestamp,
                 field: timestamp,
                 formatter(row, cell, value, columnDef, dataContext) {
-                    return value == undefined ? "" : formatFrequency(store, value)
+                    if (value == undefined || value[0] == null) return ""
+                    return escape(formatTrendCount(store.statsRelative ? value[1] : value[0], store.lang))
                 },
                 cssClass: "text-right",
             }

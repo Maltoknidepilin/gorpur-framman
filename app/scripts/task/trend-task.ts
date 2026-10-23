@@ -9,6 +9,9 @@ import { CountTimeParams, CountTimeResponse } from "../backend/types/count-time"
 import { TaskBase } from "./task-base"
 
 export class TrendTask extends TaskBase<CountTimeResponse> {
+    /** Opt in to contributions allocated from estimated or less precise dates. */
+    includeEstimated = false
+
     constructor(
         readonly cqp: string,
         readonly subqueries: [string, string][],
@@ -40,6 +43,7 @@ export class TrendTask extends TaskBase<CountTimeResponse> {
             to: formatDate(to),
             incremental: true,
             per_corpus: false,
+            date_mode: this.includeEstimated ? "spread" : "strict",
             ...subcqps,
         }
 

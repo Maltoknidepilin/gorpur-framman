@@ -1,5 +1,14 @@
 import moment, { Moment } from "moment"
-import { findOptimalLevel, formatUnixDate, getEmptyIntervals, getSeriesData, Level, PALETTE, Series } from "./util"
+import {
+    findOptimalLevel,
+    formatTrendCount,
+    formatUnixDate,
+    getEmptyIntervals,
+    getSeriesData,
+    Level,
+    PALETTE,
+    Series,
+} from "./util"
 import { last as _last, groupBy, last, maxBy, minBy, sortedIndexOf, throttle } from "lodash"
 import { CountTimeResponse, GraphStats, GraphStatsCqp } from "@/backend/types/count-time"
 import { StoreService } from "@/services/store"
@@ -27,6 +36,7 @@ export class TrendGraph {
         protected makeRequest: (from: Moment, to: Moment) => void,
         store: StoreService,
         readonly showTotal = false,
+        public fixedZoom?: Level,
     ) {
         const graph: Graph = new Rickshaw.Graph({
             element: $(".chart", el).empty().get(0),
@@ -41,6 +51,12 @@ export class TrendGraph {
             },
         })
         this.graph = graph
+        // Keep slider selections aligned to whole periods in the chosen view.
+        const update = graph.update.bind(graph)
+        graph.update = () => {
+            this.alignWindow()
+            update()
+        }
 
         // Add legend and toggling
         const legendElement = $(".legend", el).get(0)
@@ -55,31 +71,30 @@ export class TrendGraph {
             // xFormatter and yFormatter are called once for every data series per "hover detail creation"
             // formatter is only called once per per "hover detail creation"
             graph,
-            xFormatter(x: number) {
-                return `<span data-val='${x}'>${formatUnixDate(zoom, x)}</span>`
-            },
+            xFormatter: (x: number) => `<span data-val='${x}'>${formatUnixDate(this.zoom, x)}</span>`,
 
             yFormatter(y: number) {
-                const val = formatRelativeHits(y, store.lang)
+                const val = y > 0 && y < 0.1 ? formatTrendCount(y, store.lang) : formatRelativeHits(y, store.lang)
                 return `<br>${loc("rel_hits_short", store.lang)} ${val}`
             },
             formatter(series: Series, x: number, y: number, formattedX: string, formattedY: string) {
-                let abs_y
                 const i = sortedIndexOf(
                     series.data.map((point) => point.x),
                     x,
                 )
-                try {
-                    abs_y = series.abs_data[i].y
-                } catch (e) {
-                    console.log("i", i, x)
-                }
-
                 const rel = series.name + ":&nbsp;" + formattedY
+                const point = series.data[i]
+                if (!point) return ""
+                const abs_y = series.abs_data[i]?.y
+                const share =
+                    point.tokens && point.estimatedTokens
+                        ? `<br>${loc("trend_estimated_share").replace("{percent}", ((100 * point.estimatedTokens) / point.tokens).toLocaleString(store.lang, { maximumFractionDigits: 0 }))}`
+                        : ""
                 return `<span data-cqp="${encodeURIComponent(series.cqp)}">
                                 ${rel}
                                 <br>
-                                ${loc("abs_hits_short")}: ${abs_y?.toLocaleString(store.lang)}
+                                ${loc(point.estimated ? "trend_allocated_hits" : "abs_hits_short")}: ${abs_y == null ? "" : formatTrendCount(abs_y, store.lang)}
+                                ${share}
                             </span>`
             },
         })
@@ -158,9 +173,27 @@ export class TrendGraph {
         zoom: Level,
         cqp: string,
         subqueries: [string, string][],
+        includeEstimated = false,
     ) {
+        const makeData = (stats: GraphStats) => {
+            const extra = (histogram?: GraphStats["tokens"]) =>
+                new Map(histogram ? getSeriesData(histogram, zoom).map((point) => [point.x, point.y]) : [])
+            const tokens = extra(stats.tokens)
+            const estimatedHits = extra(stats.estimated_absolute)
+            const estimatedTokens = extra(stats.estimated_tokens)
+            return getSeriesData(stats.relative, zoom).map((point) => ({
+                ...point,
+                tokens: tokens.get(point.x),
+                estimatedHits: estimatedHits.get(point.x),
+                estimatedTokens: estimatedTokens.get(point.x),
+                estimated:
+                    includeEstimated ||
+                    (estimatedHits.get(point.x) || 0) > 0 ||
+                    (estimatedTokens.get(point.x) || 0) > 0,
+            }))
+        }
         const createTotalSeries = (stats: GraphStats) => ({
-            data: getSeriesData(stats.relative, zoom),
+            data: makeData(stats),
             color: "#586d69",
             name: "Σ",
             cqp,
@@ -169,7 +202,7 @@ export class TrendGraph {
 
         const labels = Object.fromEntries(subqueries)
         const createSubquerySeries = (stats: GraphStatsCqp, i: number) => ({
-            data: getSeriesData(stats.relative, zoom),
+            data: makeData(stats),
             color: PALETTE[i % PALETTE.length],
             name: labels[stats.cqp],
             cqp: stats.cqp,
@@ -185,54 +218,54 @@ export class TrendGraph {
         const emptyIntervals = getEmptyIntervals(series[0].data)
         series[0].emptyIntervals = emptyIntervals
 
-        for (let s of series) {
-            s.data = s.data.filter((item) => item.y !== null)
-            s.abs_data = s.abs_data.filter((item) => item.y !== null)
-        }
-
         return series
     }
 
+    /** Replace every period when the date policy changes; preserve legend choices. */
+    replaceGraphData(series: Series[], zoom: Level) {
+        this.zoom = zoom
+        this.graph.series.forEach((row: Series, i: number) => Object.assign(row, series[i]))
+    }
+
     /** Replace a part of the graph with new data (of a higher/lower resolution) */
-    spliceGraphData(newSeries: Series[]) {
+    spliceGraphData(newSeries: Series[], to?: Moment) {
         for (let seriesIndex = 0; seriesIndex < this.graph.series.length; seriesIndex++) {
             const seriesObj = this.graph.series[seriesIndex]
+            const incoming = newSeries[seriesIndex]
+            // A clipped response's stop marker is outside the requested period.
+            // Keep the existing overview point there until that period is fetched.
+            const stop = _last(incoming.data)
+            if (to && stop?.y === null && stop.x > to.unix()) {
+                incoming.data = incoming.data.slice(0, -1)
+                incoming.abs_data = incoming.abs_data.slice(0, -1)
+            }
             const first = newSeries[seriesIndex].data[0].x
             const last = _last(newSeries[seriesIndex].data)!.x
-
-            // Walk through old data, match timestamps with new data and find out what part to replace
-            let startSplice = false
-            let from = 0
-            // Default to replacing everything in case counting fails?
-            let n_elems = seriesObj.data.length + newSeries[seriesIndex].data.length
-            let j = 0
-            for (let i = 0; i < seriesObj.data.length; i++) {
-                const { x } = seriesObj.data[i]
-                if (x >= first && !startSplice) {
-                    // Overlapping range starts here
-                    startSplice = true
-                    from = i
-                }
-                if (startSplice) {
-                    // Count number of elements to replace
-                    j++
-                    // Stop counting at end of new data
-                    if (x >= last) {
-                        n_elems = j
-                        break
-                    }
-                }
-            }
+            const end = to ? to.clone().endOf(incoming.data[0].zoom).unix() : last
+            let from = seriesObj.data.findIndex((point: Series["data"][number]) => point.x >= first)
+            if (from < 0) from = seriesObj.data.length
+            let stopIndex = from
+            while (stopIndex < seriesObj.data.length && seriesObj.data[stopIndex].x <= end) stopIndex++
 
             // Replace overlap with new data
-            seriesObj.data.splice(from, n_elems, ...newSeries[seriesIndex].data)
-            seriesObj.abs_data.splice(from, n_elems, ...newSeries[seriesIndex].abs_data)
+            seriesObj.data.splice(from, stopIndex - from, ...incoming.data)
+            seriesObj.abs_data.splice(from, stopIndex - from, ...incoming.abs_data)
+            seriesObj.emptyIntervals = getEmptyIntervals(seriesObj.data)
         }
     }
 
     refresh() {
+        this.alignWindow()
         this.drawIntervals()
         this.graph.render()
+        this.preview.render()
+    }
+
+    alignWindow() {
+        if (!this.fixedZoom || !this.graph.window) return
+        const window = this.graph.window
+        if (window.xMin != null) window.xMin = moment.unix(window.xMin).startOf(this.fixedZoom).unix()
+        if (window.xMax != null) window.xMax = moment.unix(window.xMax).endOf(this.fixedZoom).unix()
     }
 
     /** Adds divs with .empty_area to fill spaces in graph where there is no dated material */
@@ -250,7 +283,7 @@ export class TrendGraph {
         const emptyIntervals = this.graph.series[0].emptyIntervals!
         const [from, to]: number[] = this.graph.renderer.domain().x
 
-        const unitSpan = moment.unix(to).diff(moment.unix(from), this.zoom)
+        const unitSpan = Math.max(moment.unix(to).diff(moment.unix(from), this.zoom, true), 1)
         const unitWidth = this.graph.width / unitSpan
 
         return emptyIntervals.map((list) => {
@@ -268,6 +301,7 @@ export class TrendGraph {
 
     /** Change the current zoom level if needed to match a given date range. */
     checkZoomLevel(from: Moment, to: Moment) {
+        if (this.fixedZoom) return
         const newZoom = findOptimalLevel(from, to)
         // Trigger search if new zoom level is different
         if (newZoom && this.zoom !== newZoom) {
@@ -277,6 +311,7 @@ export class TrendGraph {
     }
 
     previewPanStop() {
+        if (this.fixedZoom) return
         const visibleData = this.graph.stackData()
         const grouped = groupBy(visibleData[0], "zoom")
 

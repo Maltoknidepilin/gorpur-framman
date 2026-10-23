@@ -19,6 +19,11 @@ export type SeriesPoint = {
     x: number
     y: number
     zoom: Level
+    tokens?: number
+    estimatedHits?: number
+    estimatedTokens?: number
+    /** Use the estimated count label throughout a view that includes estimated dates. */
+    estimated?: boolean
 }
 
 export type Level = "year" | "month" | "day" | "hour" | "minute" | "second"
@@ -38,6 +43,12 @@ export const GRANULARITIES: Record<Level, Granularity> = {
 
 /** Granularities by descending size order */
 export const LEVELS: Level[] = ["year", "month", "day", "hour", "minute", "second"]
+
+/** Round displayed counts without making a positive fractional allocation look like zero. */
+export function formatTrendCount(value: number, lang: string): string {
+    if (value > 0 && value < 0.1) return `< ${Number(0.1).toLocaleString(lang)}`
+    return value.toLocaleString(lang, { maximumFractionDigits: 1 })
+}
 
 /** How to express dates of different granularities */
 export const FORMATS: Record<Level, string> = {
@@ -163,7 +174,7 @@ export function getEmptyIntervals(data: SeriesPoint[]): SeriesPoint[][] {
     return intervals
 }
 
-export function getTimeCqp(timeUnix: number, zoom: Level) {
+export function getTimeCqp(timeUnix: number, zoom: Level, dateMode: "strict" | "spread" = "spread") {
     let timecqp: string
     const m = moment(timeUnix * 1000)
 
@@ -178,17 +189,18 @@ export function getTimeCqp(timeUnix: number, zoom: Level) {
     if (LEVELS.indexOf(zoom) < 3) {
         // year, month, day
         const dateInside = `(int(_.text_datefrom) >= ${datefrom} & int(_.text_dateto) <= ${dateto})`
-        const dateOutside = `(int(_.text_datefrom) <= ${datefrom} & int(_.text_dateto) >= ${dateto})`
-        timecqp = `[${dateInside} | ${dateOutside}]`
+        const dateOverlap = `(int(_.text_datefrom) <= ${dateto} & int(_.text_dateto) >= ${datefrom})`
+        const valid = `(int(_.text_datefrom) > 0 & int(_.text_dateto) >= int(_.text_datefrom))`
+        timecqp = `[${valid} & ${dateMode === "strict" ? dateInside : dateOverlap}]`
     } else {
         // hour, minute, second
         const timefrom = moment(m).startOf(zoom).format("HHmmss")
         const timeto = moment(m).endOf(zoom).format("HHmmss")
-        const startsSameDate = `(int(_.text_datefrom) = ${datefrom} & int(_.text_dateto) <= ${dateto})`
-        const timeInside = `(int(_.text_timefrom) >= ${timefrom} & int(_.text_timeto) <= ${timeto})`
-        const startsBefore = `(int(_.text_datefrom) < ${datefrom} | (int(_.text_datefrom) = ${datefrom} & int(_.text_timefrom) <= ${timefrom}))`
-        const endsAfter = `(int(_.text_dateto) > ${dateto} | (int(_.text_dateto) = ${dateto} & int(_.text_timeto) >= ${timeto}))`
-        timecqp = `[(${startsSameDate} & ${timeInside}) | (${startsBefore} & ${endsAfter})]`
+        const startsAfter = `(int(_.text_datefrom) > ${datefrom} | (int(_.text_datefrom) = ${datefrom} & int(_.text_timefrom) >= ${timefrom}))`
+        const endsBefore = `(int(_.text_dateto) < ${dateto} | (int(_.text_dateto) = ${dateto} & int(_.text_timeto) <= ${timeto}))`
+        const startsBefore = `(int(_.text_datefrom) < ${dateto} | (int(_.text_datefrom) = ${dateto} & int(_.text_timefrom) <= ${timeto}))`
+        const endsAfter = `(int(_.text_dateto) > ${datefrom} | (int(_.text_dateto) = ${datefrom} & int(_.text_timeto) >= ${timefrom}))`
+        timecqp = dateMode === "strict" ? `[${startsAfter} & ${endsBefore}]` : `[${startsBefore} & ${endsAfter}]`
     }
 
     // In case the main query matches multiple tokens, this subquery must only match the first token in the main match.
@@ -213,7 +225,8 @@ export function createTrendTableCsv(series: Series[], relative: boolean): (strin
     const header = [loc("stats_hit"), ...dateHeaders]
 
     // Create data rows
-    const formatCell = (row: Series, cell: SeriesPoint): number => {
+    const formatCell = (row: Series, cell: SeriesPoint): number | string => {
+        if (cell.y == null) return ""
         if (relative) return cell.y
         else {
             const i = sortedIndexOf(
